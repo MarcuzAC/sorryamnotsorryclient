@@ -145,22 +145,22 @@ onUnmounted(() => {
     <!-- Navigation -->
     <nav style="position: fixed; top: 0; left: 0; right: 0; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 1000;">
       <div style="max-width: 1200px; margin: 0 auto; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center;">
-        <!-- Logo -->
-        <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;" @click="scrollTo('home')">
-          <img :src="logo" alt="Logo" style="height: 40px; width: auto;" />
-          <div style="display: none; sm:display: block;">
-            <h1 style="font-size: 14px; font-weight: 700; margin: 0; color: #1e3a8a;">Sorry I'm Not Sorry</h1>
-            <p style="font-size: 9px; color: #666; margin: 0;">We Are All Sick</p>
+        <!-- Logo with Text -->
+        <div style="display: flex; align-items: center; gap: 12px; cursor: pointer;" @click="scrollTo('home')">
+          <img :src="logo" alt="Logo" style="height: 45px; width: auto;" />
+          <div>
+            <h1 style="font-size: 16px; font-weight: 700; margin: 0; color: #1e3a8a;">Sorry I'm Not Sorry</h1>
+            <p style="font-size: 10px; color: #666; margin: 0;">We Are All Sick</p>
           </div>
         </div>
         
         <!-- Desktop Menu -->
-        <div class="desktop-menu" style="display: flex; gap: 20px; align-items: center;">
+        <div class="desktop-menu" style="display: flex; gap: 25px; align-items: center;">
           <a @click="scrollTo('home')" style="cursor: pointer; color: #1e3a8a; font-weight: 500; font-size: 14px;">Home</a>
           <a @click="scrollTo('articles')" style="cursor: pointer; color: #1e3a8a; font-weight: 500; font-size: 14px;">Articles</a>
           <a @click="scrollTo('reports')" style="cursor: pointer; color: #1e3a8a; font-weight: 500; font-size: 14px;">Reports</a>
           <a @click="scrollTo('contact')" style="cursor: pointer; color: #1e3a8a; font-weight: 500; font-size: 14px;">Contact</a>
-          <button @click="$router.push('/reports')" style="background: #2563eb; color: white; border: none; padding: 6px 16px; border-radius: 25px; font-weight: 600; font-size: 13px; cursor: pointer;">Download Reports</button>
+          <button @click="$router.push('/reports')" style="background: #2563eb; color: white; border: none; padding: 8px 20px; border-radius: 25px; font-weight: 600; font-size: 13px; cursor: pointer;">Download Reports</button>
         </div>
         
         <!-- Mobile Menu Button -->
@@ -174,7 +174,7 @@ onUnmounted(() => {
       </div>
       
       <!-- Mobile Menu -->
-      <div v-if="mobileMenuOpen" style="position: fixed; top: 64px; left: 0; right: 0; background: white; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 15px; z-index: 999;">
+      <div v-if="mobileMenuOpen" style="position: fixed; top: 69px; left: 0; right: 0; background: white; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 15px; z-index: 999;">
         <a @click="scrollTo('home')" style="cursor: pointer; color: #1e3a8a; font-weight: 500; padding: 8px 0;">Home</a>
         <a @click="scrollTo('articles')" style="cursor: pointer; color: #1e3a8a; font-weight: 500; padding: 8px 0;">Articles</a>
         <a @click="scrollTo('reports')" style="cursor: pointer; color: #1e3a8a; font-weight: 500; padding: 8px 0;">Reports</a>

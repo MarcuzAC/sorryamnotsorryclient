@@ -15,7 +15,10 @@ export default defineConfig({
     strictPort: true,
     allowedHosts: [
       'sorryamnotsorryclient.onrender.com',
-      '.onrender.com',  // Allow all render.com subdomains
+      '.onrender.com',
+      'www.sorryiamnotsorry.org',
+      'sorryiamnotsorry.org',
+      '.sorryiamnotsorry.org',  // Allow all subdomains
     ],
   },
   preview: {
@@ -25,6 +28,9 @@ export default defineConfig({
     allowedHosts: [
       'sorryamnotsorryclient.onrender.com',
       '.onrender.com',
+      'www.sorryiamnotsorry.org',
+      'sorryiamnotsorry.org',
+      '.sorryiamnotsorry.org',
     ],
   },
 })

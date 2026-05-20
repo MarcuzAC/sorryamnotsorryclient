@@ -106,7 +106,7 @@ const handleChatKeyPress = (e: KeyboardEvent) => {
 }
 
 // Auto-slide
-let slideInterval: NodeJS.Timeout
+let slideInterval: ReturnType<typeof setInterval>
 onMounted(async () => {
   slideInterval = setInterval(() => {
     currentSlide.value = (currentSlide.value + 1) % heroSlides.length

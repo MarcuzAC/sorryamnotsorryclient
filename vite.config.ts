@@ -10,13 +10,21 @@ export default defineConfig({
     },
   },
   server: {
-    host: '0.0.0.0',  // This is the fix - bind to all network interfaces
+    host: '0.0.0.0',
     port: 5173,
     strictPort: true,
+    allowedHosts: [
+      'sorryamnotsorryclient.onrender.com',
+      '.onrender.com',  // Allow all render.com subdomains
+    ],
   },
   preview: {
     host: '0.0.0.0',
     port: 5173,
     strictPort: true,
+    allowedHosts: [
+      'sorryamnotsorryclient.onrender.com',
+      '.onrender.com',
+    ],
   },
 })

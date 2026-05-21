@@ -47,6 +47,19 @@ const chatMessages = ref<{ type: string; text: string }[]>([])
 const chatInput = ref('')
 const isTyping = ref(false)
 
+// Alert functions for buttons
+const handleVolunteer = () => {
+  alert('Please email info@sorryimnotsorry.org to volunteer')
+}
+
+const handlePartner = () => {
+  alert('Please email partnerships@sorryimnotsorry.org')
+}
+
+const handleDonate = () => {
+  alert('Thank you for your support! Donation page coming soon.')
+}
+
 const truncate = (text: string, length: number) => {
   if (!text) return ''
   return text.length > length ? text.substring(0, length) + '...' : text
@@ -247,7 +260,7 @@ onUnmounted(() => {
       </div>
     </section>
 
-    <!-- What We Do Section - Restyled -->
+    <!-- What We Do Section -->
     <section id="whatwedo" style="padding: 80px 20px; background: white;">
       <div style="max-width: 1200px; margin: 0 auto;">
         <h2 style="text-align: center; font-size: clamp(32px, 6vw, 42px); font-weight: 700; margin-bottom: 20px; color: #1e3a8a;">What We Do</h2>
@@ -382,7 +395,7 @@ onUnmounted(() => {
       </div>
     </section>
 
-    <!-- Articles Section - Redesigned -->
+    <!-- Articles Section -->
     <section id="articles" style="padding: 80px 20px; background: #f0f9ff;">
       <div style="max-width: 1200px; margin: 0 auto;">
         <div style="text-align: center; margin-bottom: 50px;">
@@ -393,7 +406,7 @@ onUnmounted(() => {
         <div v-if="articlesLoading" style="text-align: center; padding: 60px;">Loading articles...</div>
         <div v-else-if="articles.length === 0" style="text-align: center; padding: 60px;">No articles yet.</div>
         <div v-else style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 30px;">
-          <div v-for="article in articles" :key="article.id" @click="router.push(`/articles/${article.id}`)" style="border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.08); cursor: pointer; transition: transform 0.3s, box-shadow 0.3s; background: white;">
+          <div v-for="article in articles" :key="article.id" @click="router.push(`/articles/${article.id}`)" style="border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.08); cursor: pointer; transition: transform 0.3s; background: white;">
             <div v-if="article.image_url" :style="{ height: '220px', backgroundImage: `url(${article.image_url})`, backgroundSize: 'cover', backgroundPosition: 'center' }"></div>
             <div v-else style="height: 220px; background: linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%); display: flex; align-items: center; justify-content: center;">
               <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5">
@@ -410,18 +423,18 @@ onUnmounted(() => {
               <p style="color: #666; margin-bottom: 16px; line-height: 1.6;">{{ truncate(article.subtitle || article.content, 100) }}</p>
               <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e5e7eb; padding-top: 16px;">
                 <span style="color: #999; font-size: 13px;">By {{ article.author }}</span>
-                <span style="color: #2563eb; font-weight: 600; display: flex; align-items: center; gap: 5px;">Read More <span>→</span></span>
+                <span style="color: #2563eb; font-weight: 600; display: flex; align-items: center; gap: 5px;">Read More →</span>
               </div>
             </div>
           </div>
         </div>
         <div style="text-align: center; margin-top: 50px;">
-          <button @click="router.push('/articles')" style="background: #2563eb; color: white; border: none; padding: 12px 32px; border-radius: 40px; font-size: 16px; font-weight: 600; cursor: pointer; transition: background 0.3s;">View All Articles</button>
+          <button @click="router.push('/articles')" style="background: #2563eb; color: white; border: none; padding: 12px 32px; border-radius: 40px; font-size: 16px; font-weight: 600; cursor: pointer;">View All Articles</button>
         </div>
       </div>
     </section>
 
-    <!-- Reports Section - Redesigned -->
+    <!-- Reports Section -->
     <section id="reports" style="padding: 80px 20px; background: white;">
       <div style="max-width: 1200px; margin: 0 auto;">
         <div style="text-align: center; margin-bottom: 50px;">
@@ -447,7 +460,7 @@ onUnmounted(() => {
               <span style="color: #999; font-size: 13px;">📅 {{ new Date(report.created_at).toLocaleDateString() }}</span>
               <span style="color: #999; font-size: 13px;">📥 {{ report.download_count }} downloads</span>
             </div>
-            <button @click="downloadReport(report.id, report.file_url)" style="width: 100%; background: #2563eb; color: white; border: none; padding: 12px; border-radius: 40px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.3s;">Download PDF</button>
+            <button @click="downloadReport(report.id, report.file_url)" style="width: 100%; background: #2563eb; color: white; border: none; padding: 12px; border-radius: 40px; font-size: 14px; font-weight: 600; cursor: pointer;">Download PDF</button>
           </div>
         </div>
         <div style="text-align: center; margin-top: 50px;">
@@ -472,7 +485,7 @@ onUnmounted(() => {
             </div>
             <h3 style="font-size: 22px; margin-bottom: 15px; color: #1e3a8a;">Become a Volunteer</h3>
             <p style="color: #666; margin-bottom: 25px; line-height: 1.6;">Join our network of trained mental health advocates across Malawi.</p>
-            <button @click="alert('Please email info@sorryimnotsorry.org to volunteer')" style="background: #2563eb; color: white; border: none; padding: 10px 25px; border-radius: 30px; cursor: pointer;">Join Now</button>
+            <button @click="handleVolunteer" style="background: #2563eb; color: white; border: none; padding: 10px 25px; border-radius: 30px; cursor: pointer;">Join Now</button>
           </div>
           
           <div style="background: white; padding: 40px 30px; border-radius: 20px; text-align: center; transition: transform 0.3s;">
@@ -486,7 +499,7 @@ onUnmounted(() => {
             </div>
             <h3 style="font-size: 22px; margin-bottom: 15px; color: #1e3a8a;">Partner With Us</h3>
             <p style="color: #666; margin-bottom: 25px; line-height: 1.6;">Collaborate with us to expand mental health services across sectors.</p>
-            <button @click="alert('Please email partnerships@sorryimnotsorry.org')" style="background: #2563eb; color: white; border: none; padding: 10px 25px; border-radius: 30px; cursor: pointer;">Partner Today</button>
+            <button @click="handlePartner" style="background: #2563eb; color: white; border: none; padding: 10px 25px; border-radius: 30px; cursor: pointer;">Partner Today</button>
           </div>
           
           <div style="background: white; padding: 40px 30px; border-radius: 20px; text-align: center; transition: transform 0.3s;">
@@ -498,7 +511,7 @@ onUnmounted(() => {
             </div>
             <h3 style="font-size: 22px; margin-bottom: 15px; color: #1e3a8a;">Make a Donation</h3>
             <p style="color: #666; margin-bottom: 25px; line-height: 1.6;">Support our programs and help us reach more communities.</p>
-            <button @click="alert('Thank you for your support! Donation page coming soon.')" style="background: #2563eb; color: white; border: none; padding: 10px 25px; border-radius: 30px; cursor: pointer;">Donate</button>
+            <button @click="handleDonate" style="background: #2563eb; color: white; border: none; padding: 10px 25px; border-radius: 30px; cursor: pointer;">Donate</button>
           </div>
         </div>
       </div>

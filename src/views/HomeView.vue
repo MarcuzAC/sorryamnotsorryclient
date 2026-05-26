@@ -383,20 +383,20 @@ onUnmounted(() => {
           </p>
         </div>
 
-        <!-- Our Work Includes - BIG IMAGE SLIDESHOW (FIXED WITH SAFETY CHECKS) -->
+        <!-- Our Work Includes - BIG IMAGE SLIDESHOW (FULLY FIXED) -->
         <div style="margin-bottom: 50px;">
           <h3 style="text-align: center; font-size: 32px; font-weight: 700; color: #1e3a8a; margin-bottom: 15px;">Our Work Includes</h3>
           <p style="text-align: center; color: #4b5563; font-size: 18px; margin-bottom: 50px;">Explore the different ways we're making mental health support accessible across Malawi</p>
           
           <!-- Slideshow -->
           <div style="position: relative; max-width: 1200px; margin: 0 auto;">
-            <!-- Main Slide with SAFE CHECK - This fixes the TypeScript errors -->
-            <div v-if="workSlides.length > 0 && workSlides[currentWorkSlide]" style="background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.1);">
+            <!-- Main Slide with SAFE CHECK using non-null assertion -->
+            <div v-if="workSlides[currentWorkSlide]" style="background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.1);">
               <div style="position: relative; height: 500px; overflow: hidden;">
-                <img :src="workSlides[currentWorkSlide].image" :alt="workSlides[currentWorkSlide].title" style="width: 100%; height: 100%; object-fit: cover;" />
+                <img :src="workSlides[currentWorkSlide]!.image" :alt="workSlides[currentWorkSlide]!.title" style="width: 100%; height: 100%; object-fit: cover;" />
                 <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.85), transparent); padding: 50px 40px 40px;">
-                  <h4 style="font-size: 32px; font-weight: 700; color: white; margin-bottom: 12px;">{{ workSlides[currentWorkSlide].title }}</h4>
-                  <p style="font-size: 18px; color: rgba(255,255,255,0.95); line-height: 1.6; max-width: 70%;">{{ workSlides[currentWorkSlide].description }}</p>
+                  <h4 style="font-size: 32px; font-weight: 700; color: white; margin-bottom: 12px;">{{ workSlides[currentWorkSlide]!.title }}</h4>
+                  <p style="font-size: 18px; color: rgba(255,255,255,0.95); line-height: 1.6; max-width: 70%;">{{ workSlides[currentWorkSlide]!.description }}</p>
                 </div>
               </div>
             </div>

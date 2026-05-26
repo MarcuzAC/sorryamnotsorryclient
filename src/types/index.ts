@@ -1,3 +1,5 @@
+// types.ts
+
 export interface Article {
   id: number;
   title: string;
@@ -31,4 +33,11 @@ export interface ContactFormData {
 export interface VentingMessage {
   message: string;
   user_id?: string;
+}
+
+export interface WorkSlide {
+  id: number;
+  image: string;
+  title: string;
+  description: string;
 }

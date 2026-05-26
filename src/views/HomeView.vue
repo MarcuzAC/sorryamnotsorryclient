@@ -19,6 +19,107 @@ import maternalImg from '@/assets/images/maternal.jpg'
 import skillsImg from '@/assets/images/skills.jpg'
 import advocacyImg from '@/assets/images/advocacy.jpg'
 
+// Our Work Includes slideshow images
+import communityImg from '@/assets/images/community.jpg'
+import crisisImg from '@/assets/images/crisis.jpg'
+import youthProgrammesImg from '@/assets/images/youth-programmes.jpg'
+import therapyImg from '@/assets/images/therapy.jpg'
+import advocacyIconImg from '@/assets/images/advocacy-icon.jpg'
+import psychosocialImg from '@/assets/images/psychosocial.jpg'
+import mobilisationImg from '@/assets/images/mobilisation.jpg'
+import digitalImg from '@/assets/images/digital.jpg'
+
+// Report PDF
+import freeTherapyPdf from '@/assets/reports/Free_therapy.pdf'
+
+// Slideshow data for Our Work Includes
+const workSlides = ref([
+  {
+    id: 1,
+    image: communityImg,
+    title: "Community Safe Spaces",
+    description: "Creating safe, judgment-free environments where individuals can access mental health support, share experiences, and find community connection in their neighborhoods."
+  },
+  {
+    id: 2,
+    image: crisisImg,
+    title: "Crisis Response Systems",
+    description: "24/7 emergency mental health support with trained crisis responders, helplines, and rapid referral networks for individuals in psychological distress."
+  },
+  {
+    id: 3,
+    image: youthProgrammesImg,
+    title: "Youth Mental Health Programmes",
+    description: "School-based mental health education, peer support clubs, and youth leadership training reaching thousands of young people across Malawi."
+  },
+  {
+    id: 4,
+    image: therapyImg,
+    title: "Therapy Initiatives",
+    description: "Accessible counselling services, group therapy sessions, and professional mental health support for individuals and families in need."
+  },
+  {
+    id: 5,
+    image: advocacyIconImg,
+    title: "Advocacy Campaigns",
+    description: "National campaigns to reduce stigma, influence mental health policy, and promote mental health as a development priority in Malawi."
+  },
+  {
+    id: 6,
+    image: psychosocialImg,
+    title: "Psychosocial Support",
+    description: "Holistic support addressing emotional, social, and psychological wellbeing through community-based interventions and trained peer supporters."
+  },
+  {
+    id: 7,
+    image: mobilisationImg,
+    title: "Community Mobilisation",
+    description: "Engaging community leaders, faith groups, and local organizations to build sustainable mental health support networks from the ground up."
+  },
+  {
+    id: 8,
+    image: digitalImg,
+    title: "Digital Mental Health Initiatives",
+    description: "Online counselling platforms, mental health apps, and digital resources making support accessible to remote and underserved communities."
+  }
+])
+
+const currentWorkSlide = ref(0)
+let workSlideInterval: ReturnType<typeof setInterval>
+
+const nextWorkSlide = () => {
+  currentWorkSlide.value = (currentWorkSlide.value + 1) % workSlides.value.length
+}
+
+const prevWorkSlide = () => {
+  currentWorkSlide.value = (currentWorkSlide.value - 1 + workSlides.value.length) % workSlides.value.length
+}
+
+const goToWorkSlide = (index: number) => {
+  currentWorkSlide.value = index
+}
+
+// Report preview modal
+const showReportModal = ref(false)
+const reportPdfUrl = freeTherapyPdf
+
+const openReportPreview = () => {
+  showReportModal.value = true
+}
+
+const closeReportPreview = () => {
+  showReportModal.value = false
+}
+
+const downloadReport = () => {
+  const link = document.createElement('a')
+  link.href = freeTherapyPdf
+  link.download = 'Free_Therapy_Report.pdf'
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+}
+
 const router = useRouter()
 const articles = ref<Article[]>([])
 const reports = ref<Report[]>([])
@@ -26,6 +127,7 @@ const articlesLoading = ref(true)
 const reportsLoading = ref(true)
 const currentSlide = ref(0)
 const mobileMenuOpen = ref(false)
+const activeTab = ref('articles')
 
 // Social Links
 const SOCIAL_LINKS = {
@@ -71,7 +173,7 @@ const scrollTo = (id: string) => {
   mobileMenuOpen.value = false
 }
 
-const downloadReport = async (id: number, url: string) => {
+const downloadReportFromAPI = async (id: number, url: string) => {
   try {
     await publicAPI.downloadReport(id)
     window.open(url, '_blank')
@@ -142,8 +244,13 @@ onMounted(async () => {
     currentSlide.value = (currentSlide.value + 1) % heroSlides.length
   }, 5000)
   
+  // Auto-slide for work section
+  workSlideInterval = setInterval(() => {
+    nextWorkSlide()
+  }, 6000)
+  
   try {
-    const res = await publicAPI.getArticles(0, 3)
+    const res = await publicAPI.getArticles(0, 6)
     articles.value = res.data
   } catch (error) {
     console.error('Failed to load articles')
@@ -165,6 +272,7 @@ onMounted(async () => {
 
 onUnmounted(() => {
   if (slideInterval) clearInterval(slideInterval)
+  if (workSlideInterval) clearInterval(workSlideInterval)
 })
 </script>
 
@@ -187,8 +295,7 @@ onUnmounted(() => {
           <a @click="scrollTo('home')" style="cursor: pointer; color: #1e3a8a; font-weight: 500; font-size: 14px;">Home</a>
           <a @click="scrollTo('about')" style="cursor: pointer; color: #1e3a8a; font-weight: 500; font-size: 14px;">About</a>
           <a @click="scrollTo('whatwedo')" style="cursor: pointer; color: #1e3a8a; font-weight: 500; font-size: 14px;">What We Do</a>
-          <a @click="scrollTo('articles')" style="cursor: pointer; color: #1e3a8a; font-weight: 500; font-size: 14px;">Articles</a>
-          <a @click="scrollTo('reports')" style="cursor: pointer; color: #1e3a8a; font-weight: 500; font-size: 14px;">Reports</a>
+          <a @click="scrollTo('publications')" style="cursor: pointer; color: #1e3a8a; font-weight: 500; font-size: 14px;">Publications</a>
           <a @click="scrollTo('getinvolved')" style="cursor: pointer; color: #1e3a8a; font-weight: 500; font-size: 14px;">Get Involved</a>
           <a @click="scrollTo('contact')" style="cursor: pointer; color: #1e3a8a; font-weight: 500; font-size: 14px;">Contact</a>
         </div>
@@ -211,8 +318,7 @@ onUnmounted(() => {
         <a @click="scrollTo('home')" style="cursor: pointer; color: #1e3a8a; font-weight: 500; padding: 8px 0;">Home</a>
         <a @click="scrollTo('about')" style="cursor: pointer; color: #1e3a8a; font-weight: 500; padding: 8px 0;">About</a>
         <a @click="scrollTo('whatwedo')" style="cursor: pointer; color: #1e3a8a; font-weight: 500; padding: 8px 0;">What We Do</a>
-        <a @click="scrollTo('articles')" style="cursor: pointer; color: #1e3a8a; font-weight: 500; padding: 8px 0;">Articles</a>
-        <a @click="scrollTo('reports')" style="cursor: pointer; color: #1e3a8a; font-weight: 500; padding: 8px 0;">Reports</a>
+        <a @click="scrollTo('publications')" style="cursor: pointer; color: #1e3a8a; font-weight: 500; padding: 8px 0;">Publications</a>
         <a @click="scrollTo('getinvolved')" style="cursor: pointer; color: #1e3a8a; font-weight: 500; padding: 8px 0;">Get Involved</a>
         <a @click="scrollTo('contact')" style="cursor: pointer; color: #1e3a8a; font-weight: 500; padding: 8px 0;">Contact</a>
         <button @click="$router.push('/reports')" style="background: #2563eb; color: white; border: none; padding: 10px; border-radius: 25px; font-weight: 600;">Download Reports</button>
@@ -232,7 +338,7 @@ onUnmounted(() => {
           <h1 style="font-size: clamp(28px, 8vw, 48px); font-weight: 700; margin-bottom: 16px;">Mainstreaming Mental Health as a Development Priority in Malawi</h1>
           <p style="font-size: clamp(14px, 4vw, 20px); margin-bottom: 24px; opacity: 0.9;">Together, we can turn silence into solidarity and make mental health everyone's business.</p>
           <div style="display: flex; flex-wrap: wrap; gap: 12px; justify-content: center;">
-            <button @click="scrollTo('articles')" style="background: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 50px; font-size: clamp(12px, 4vw, 16px); font-weight: 600; cursor: pointer;">Read Articles</button>
+            <button @click="scrollTo('publications')" style="background: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 50px; font-size: clamp(12px, 4vw, 16px); font-weight: 600; cursor: pointer;">Read Publications</button>
             <button @click="$router.push('/reports')" style="background: transparent; border: 2px solid white; color: white; padding: 10px 20px; border-radius: 50px; font-size: clamp(12px, 4vw, 16px); font-weight: 600; cursor: pointer;">Download Reports</button>
             <button @click="chatOpen = true" style="background: #f59e0b; border: none; color: white; padding: 10px 20px; border-radius: 50px; font-size: clamp(12px, 4vw, 16px); font-weight: 600; cursor: pointer;">Get Help</button>
           </div>
@@ -249,28 +355,214 @@ onUnmounted(() => {
     <section id="about" style="padding: 80px 20px; background: white;">
       <div style="max-width: 1200px; margin: 0 auto;">
         <h2 style="text-align: center; font-size: clamp(32px, 6vw, 42px); font-weight: 700; margin-bottom: 20px; color: #1e3a8a;">About Us</h2>
-        <div style="max-width: 900px; margin: 0 auto; text-align: center;">
+        
+        <!-- Main Description -->
+        <div style="max-width: 1000px; margin: 0 auto 50px auto; text-align: center;">
           <p style="font-size: 18px; color: #4b5563; line-height: 1.8; margin-bottom: 30px;">
-            <strong>Sorry I'm Not Sorry: We Are All Sick</strong> is a Malawian mental health organisation dedicated to mainstreaming mental health as a development issue across education, health, livelihoods, gender, and governance.
+            We are a <strong>youth-led mental health organisation</strong> based in Malawi, committed to making mental health support more accessible, community-driven, and stigma-free.
+          </p>
+          <p style="font-size: 16px; color: #6b7280; line-height: 1.8; margin-bottom: 30px;">
+            Founded in 2023 and legally registered in 2025, the organisation was born out of a growing need for safe spaces, honest conversations, and practical mental health support within communities where many people continue to struggle in silence.
           </p>
           <p style="font-size: 16px; color: #6b7280; line-height: 1.8;">
-            Founded in 2023 by <strong>Joseph Daniel Sukali</strong>, the organisation brings together more than 150 trained advocates across 15 districts, working tirelessly to break the silence surrounding mental health in Malawi.
+            We believe mental health is not only a health issue, but a <strong>development issue</strong> that affects education, livelihoods, relationships, productivity, families, and communities. Our work focuses on connecting people to care, empowering communities with knowledge and tools, and building systems that make support more accessible across Malawi.
+          </p>
+        </div>
+
+        <!-- Our Work Includes - BIG IMAGE SLIDESHOW -->
+        <div style="margin-bottom: 50px;">
+          <h3 style="text-align: center; font-size: 32px; font-weight: 700; color: #1e3a8a; margin-bottom: 15px;">Our Work Includes</h3>
+          <p style="text-align: center; color: #4b5563; font-size: 18px; margin-bottom: 50px;">Explore the different ways we're making mental health support accessible across Malawi</p>
+          
+          <!-- Slideshow -->
+          <div style="position: relative; max-width: 1200px; margin: 0 auto;">
+            <!-- Main Slide -->
+            <div style="background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.1);">
+              <div style="position: relative; height: 500px; overflow: hidden;">
+                <img :src="workSlides[currentWorkSlide].image" :alt="workSlides[currentWorkSlide].title" style="width: 100%; height: 100%; object-fit: cover;" />
+                <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.85), transparent); padding: 50px 40px 40px;">
+                  <h4 style="font-size: 32px; font-weight: 700; color: white; margin-bottom: 12px;">{{ workSlides[currentWorkSlide].title }}</h4>
+                  <p style="font-size: 18px; color: rgba(255,255,255,0.95); line-height: 1.6; max-width: 70%;">{{ workSlides[currentWorkSlide].description }}</p>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Navigation Arrows -->
+            <button @click="prevWorkSlide" style="position: absolute; top: 50%; left: 20px; transform: translateY(-50%); width: 48px; height: 48px; background: white; border: none; border-radius: 50%; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; color: #1e3a8a; transition: all 0.3s;">
+              ←
+            </button>
+            <button @click="nextWorkSlide" style="position: absolute; top: 50%; right: 20px; transform: translateY(-50%); width: 48px; height: 48px; background: white; border: none; border-radius: 50%; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; color: #1e3a8a; transition: all 0.3s;">
+              →
+            </button>
+            
+            <!-- Dots Indicator -->
+            <div style="display: flex; justify-content: center; gap: 12px; margin-top: 30px;">
+              <button 
+                v-for="(slide, index) in workSlides" 
+                :key="index"
+                @click="goToWorkSlide(index)"
+                :style="{
+                  width: currentWorkSlide === index ? '40px' : '10px',
+                  height: '10px',
+                  borderRadius: '20px',
+                  border: 'none',
+                  backgroundColor: currentWorkSlide === index ? '#2563eb' : '#cbd5e1',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s'
+                }">
+              </button>
+            </div>
+            
+            <!-- Thumbnail Navigation -->
+            <div style="display: flex; justify-content: center; gap: 12px; margin-top: 30px; flex-wrap: wrap;">
+              <button 
+                v-for="(slide, index) in workSlides" 
+                :key="index"
+                @click="goToWorkSlide(index)"
+                :style="{
+                  width: '70px',
+                  height: '70px',
+                  borderRadius: '12px',
+                  border: currentWorkSlide === index ? '3px solid #2563eb' : '2px solid #e2e8f0',
+                  cursor: 'pointer',
+                  overflow: 'hidden',
+                  padding: '0',
+                  background: 'transparent'
+                }">
+                <img :src="slide.image" :alt="slide.title" style="width: 100%; height: 100%; object-fit: cover;" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Free Therapy Report Section -->
+        <div style="margin: 60px 0 50px; background: linear-gradient(135deg, #f0f9ff 0%, #e0e7ff 100%); border-radius: 24px; padding: 50px; text-align: center;">
+          <div style="display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 20px; flex-wrap: wrap;">
+            <div style="width: 80px; height: 80px; background: #2563eb; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+              <svg width="45" height="45" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="16" y1="13" x2="8" y2="13" />
+                <line x1="16" y1="17" x2="8" y2="17" />
+              </svg>
+            </div>
+            <h3 style="font-size: 32px; font-weight: 700; color: #1e3a8a; margin: 0;">Free Therapy Initiative Report</h3>
+          </div>
+          <p style="font-size: 18px; color: #4b5563; margin-bottom: 30px; max-width: 700px; margin-left: auto; margin-right: auto;">
+            Learn about our impact, success stories, and how free therapy is transforming mental health care in Malawi.
+          </p>
+          <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+            <button @click="openReportPreview" style="background: #2563eb; color: white; border: none; padding: 14px 32px; border-radius: 50px; font-size: 16px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 10px;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="5 3 19 12 5 21 5 3" />
+              </svg>
+              Preview Report
+            </button>
+            <button @click="downloadReport" style="background: #10b981; color: white; border: none; padding: 14px 32px; border-radius: 50px; font-size: 16px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 10px;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              Download PDF
+            </button>
+          </div>
+        </div>
+
+        <!-- Achievements / Impact -->
+        <div style="margin-bottom: 50px;">
+          <h3 style="text-align: center; font-size: 24px; font-weight: 700; color: #1e3a8a; margin-bottom: 30px;">Since Our Founding</h3>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px;">
+            <div style="text-align: center; padding: 25px; background: #f0f9ff; border-radius: 16px;">
+              <div style="width: 60px; height: 60px; background: #e0e7ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.8">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+              </div>
+              <p style="font-size: 16px; color: #4b5563;">Built a growing network of trained mental health advocates</p>
+            </div>
+            <div style="text-align: center; padding: 25px; background: #f0f9ff; border-radius: 16px;">
+              <div style="width: 60px; height: 60px; background: #e0e7ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.8">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
+                </svg>
+              </div>
+              <p style="font-size: 16px; color: #4b5563;">Supported psychological emergencies and crisis referrals</p>
+            </div>
+            <div style="text-align: center; padding: 25px; background: #f0f9ff; border-radius: 16px;">
+              <div style="width: 60px; height: 60px; background: #e0e7ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.8">
+                  <path d="M12 2a10 10 0 1 0 10 10 10 10 0 0 0-10-10z" />
+                  <path d="M12 6v6l4 2" />
+                </svg>
+              </div>
+              <p style="font-size: 16px; color: #4b5563;">Led national awareness and therapy campaigns</p>
+            </div>
+            <div style="text-align: center; padding: 25px; background: #f0f9ff; border-radius: 16px;">
+              <div style="width: 60px; height: 60px; background: #e0e7ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.8">
+                  <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+                </svg>
+              </div>
+              <p style="font-size: 16px; color: #4b5563;">Engaged thousands through community and digital initiatives</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Core Values -->
+        <div style="margin-bottom: 50px;">
+          <h3 style="text-align: center; font-size: 24px; font-weight: 700; color: #1e3a8a; margin-bottom: 30px;">Our Work Is Grounded In</h3>
+          <div style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: center;">
+            <span style="padding: 10px 24px; background: #e0e7ff; color: #1e3a8a; border-radius: 40px; font-weight: 500;">Compassion</span>
+            <span style="padding: 10px 24px; background: #e0e7ff; color: #1e3a8a; border-radius: 40px; font-weight: 500;">Human dignity</span>
+            <span style="padding: 10px 24px; background: #e0e7ff; color: #1e3a8a; border-radius: 40px; font-weight: 500;">Inclusion</span>
+            <span style="padding: 10px 24px; background: #e0e7ff; color: #1e3a8a; border-radius: 40px; font-weight: 500;">Community empowerment</span>
+            <span style="padding: 10px 24px; background: #e0e7ff; color: #1e3a8a; border-radius: 40px; font-weight: 500;">Safeguarding and ethical care</span>
+            <span style="padding: 10px 24px; background: #e0e7ff; color: #1e3a8a; border-radius: 40px; font-weight: 500;">Evidence-based approaches</span>
+            <span style="padding: 10px 24px; background: #e0e7ff; color: #1e3a8a; border-radius: 40px; font-weight: 500;">Culturally responsive care</span>
+          </div>
+        </div>
+
+        <!-- Closing Statement -->
+        <div style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); border-radius: 20px; padding: 50px 40px; text-align: center; color: white;">
+          <p style="font-size: 22px; font-weight: 600; line-height: 1.6; margin-bottom: 0;">
+            At our core, we are building more than programmes.<br>
+            We are building a movement where people feel seen, heard, supported,<br>
+            and reminded that <strong style="color: #fcd34d;">healing should never be a privilege</strong>.
           </p>
         </div>
       </div>
     </section>
 
+    <!-- Report Preview Modal -->
+    <div v-if="showReportModal" @click="closeReportPreview" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px;">
+      <div @click.stop style="background: white; border-radius: 20px; width: 90%; max-width: 1000px; height: 80vh; display: flex; flex-direction: column; overflow: hidden;">
+        <div style="padding: 20px; background: #1e3a8a; color: white; display: flex; justify-content: space-between; align-items: center;">
+          <h3 style="margin: 0; font-size: 20px;">Free Therapy Initiative Report</h3>
+          <button @click="closeReportPreview" style="background: none; border: none; color: white; font-size: 24px; cursor: pointer;">&times;</button>
+        </div>
+        <div style="flex: 1; overflow: auto;">
+          <iframe :src="reportPdfUrl" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+        <div style="padding: 15px; background: #f0f9ff; display: flex; justify-content: center; gap: 15px;">
+          <button @click="downloadReport" style="background: #10b981; color: white; border: none; padding: 10px 24px; border-radius: 40px; cursor: pointer; font-weight: 600;">Download PDF</button>
+          <button @click="closeReportPreview" style="background: #6b7280; color: white; border: none; padding: 10px 24px; border-radius: 40px; cursor: pointer; font-weight: 600;">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rest of your sections (What We Do, Publications, Get Involved, Contact, Footer, Chat) -->
     <!-- What We Do Section -->
     <section id="whatwedo" style="padding: 80px 20px; background: white;">
       <div style="max-width: 1200px; margin: 0 auto;">
         <h2 style="text-align: center; font-size: clamp(32px, 6vw, 42px); font-weight: 700; margin-bottom: 20px; color: #1e3a8a;">What We Do</h2>
-        <p style="text-align: center; color: #666; margin-bottom: 60px; font-size: 18px; max-width: 700px; margin-left: auto; margin-right: auto;">Our programs and initiatives across Malawi</p>
+        <p style="text-align: center; color: #666; margin-bottom: 60px; font-size: 18px;">Our programs and initiatives across Malawi</p>
         
-        <!-- Venting Rooms -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center; margin-bottom: 80px;">
-          <div>
-            <img :src="ventingImg" alt="Venting Rooms" style="width: 100%; border-radius: 20px; box-shadow: 0 20px 30px -10px rgba(0,0,0,0.1);" />
-          </div>
+          <div><img :src="ventingImg" alt="Venting Rooms" style="width: 100%; border-radius: 20px; box-shadow: 0 20px 30px -10px rgba(0,0,0,0.1);" /></div>
           <div>
             <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
               <div style="width: 50px; height: 50px; background: #e0e7ff; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
@@ -281,16 +573,13 @@ onUnmounted(() => {
               </div>
               <h3 style="font-size: 28px; font-weight: 700; color: #1e3a8a; margin: 0;">Venting Rooms & Helplines</h3>
             </div>
-            <p style="color: #4b5563; font-size: 16px; line-height: 1.8; margin-bottom: 15px;">Safe, confidential spaces where individuals can share their struggles without fear of judgment. Our trained peer supporters listen with empathy and provide immediate emotional support.</p>
-            <p style="color: #6b7280; font-size: 15px; line-height: 1.7;">Available 24/7 across multiple districts, our venting rooms have become a lifeline for hundreds of Malawians seeking someone to talk to during difficult moments.</p>
+            <p style="color: #4b5563; font-size: 16px; line-height: 1.8; margin-bottom: 15px;">Safe, confidential spaces where individuals can share their struggles without fear of judgment.</p>
+            <p style="color: #6b7280; font-size: 15px; line-height: 1.7;">Available 24/7 across multiple districts, our venting rooms have become a lifeline for hundreds of Malawians.</p>
           </div>
         </div>
         
-        <!-- Friendship Benches -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center; margin-bottom: 80px;">
-          <div style="order: 2;">
-            <img :src="friendshipImg" alt="Friendship Benches" style="width: 100%; border-radius: 20px; box-shadow: 0 20px 30px -10px rgba(0,0,0,0.1);" />
-          </div>
+          <div style="order: 2;"><img :src="friendshipImg" alt="Friendship Benches" style="width: 100%; border-radius: 20px; box-shadow: 0 20px 30px -10px rgba(0,0,0,0.1);" /></div>
           <div style="order: 1;">
             <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
               <div style="width: 50px; height: 50px; background: #e0e7ff; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
@@ -298,21 +587,17 @@ onUnmounted(() => {
                   <path d="M12 2a10 10 0 1 0 10 10 10 10 0 0 0-10-10z" />
                   <path d="M12 6v6l4 2" />
                   <path d="M16 21.5a4 4 0 0 0-4-4h-2a4 4 0 0 0-4 4" />
-                  <path d="M9 9a3 3 0 1 0 6 0 3 3 0 0 0-6 0" />
                 </svg>
               </div>
               <h3 style="font-size: 28px; font-weight: 700; color: #1e3a8a; margin: 0;">Friendship Benches</h3>
             </div>
-            <p style="color: #4b5563; font-size: 16px; line-height: 1.8; margin-bottom: 15px;">Community-based psychosocial counselling delivered by trained grandmothers and community health workers in accessible public spaces.</p>
-            <p style="color: #6b7280; font-size: 15px; line-height: 1.7;">Based on the proven Friendship Bench model, we've established benches in 15 districts where anyone can sit, talk, and receive culturally appropriate mental health support.</p>
+            <p style="color: #4b5563; font-size: 16px; line-height: 1.8; margin-bottom: 15px;">Community-based psychosocial counselling delivered by trained grandmothers and community health workers.</p>
+            <p style="color: #6b7280; font-size: 15px; line-height: 1.7;">We've established benches in 15 districts where anyone can receive culturally appropriate mental health support.</p>
           </div>
         </div>
         
-        <!-- Youth & School Clubs -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center; margin-bottom: 80px;">
-          <div>
-            <img :src="youthImg" alt="Youth & School Clubs" style="width: 100%; border-radius: 20px; box-shadow: 0 20px 30px -10px rgba(0,0,0,0.1);" />
-          </div>
+          <div><img :src="youthImg" alt="Youth & School Clubs" style="width: 100%; border-radius: 20px; box-shadow: 0 20px 30px -10px rgba(0,0,0,0.1);" /></div>
           <div>
             <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
               <div style="width: 50px; height: 50px; background: #e0e7ff; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
@@ -320,21 +605,17 @@ onUnmounted(() => {
                   <path d="M22 10v6M2 10v6" />
                   <path d="M12 17v5M8 21h8" />
                   <path d="M12 12a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
-                  <path d="M5 3.2A9 9 0 0 1 19 3.2" />
                 </svg>
               </div>
               <h3 style="font-size: 28px; font-weight: 700; color: #1e3a8a; margin: 0;">Youth & School Clubs</h3>
             </div>
-            <p style="color: #4b5563; font-size: 16px; line-height: 1.8; margin-bottom: 15px;">Building mental health literacy in primary and secondary schools through peer-support clubs, teacher training, and awareness campaigns.</p>
-            <p style="color: #6b7280; font-size: 15px; line-height: 1.7;">We've established 45+ school clubs reaching over 10,000 students with mental health education, coping skills, and referral pathways.</p>
+            <p style="color: #4b5563; font-size: 16px; line-height: 1.8; margin-bottom: 15px;">Building mental health literacy through peer-support clubs, teacher training, and awareness campaigns.</p>
+            <p style="color: #6b7280; font-size: 15px; line-height: 1.7;">45+ school clubs reaching over 10,000 students with mental health education and coping skills.</p>
           </div>
         </div>
         
-        <!-- Maternal Circles -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center; margin-bottom: 80px;">
-          <div style="order: 2;">
-            <img :src="maternalImg" alt="Maternal Circles" style="width: 100%; border-radius: 20px; box-shadow: 0 20px 30px -10px rgba(0,0,0,0.1);" />
-          </div>
+          <div style="order: 2;"><img :src="maternalImg" alt="Maternal Circles" style="width: 100%; border-radius: 20px; box-shadow: 0 20px 30px -10px rgba(0,0,0,0.1);" /></div>
           <div style="order: 1;">
             <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
               <div style="width: 50px; height: 50px; background: #e0e7ff; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
@@ -345,16 +626,13 @@ onUnmounted(() => {
               </div>
               <h3 style="font-size: 28px; font-weight: 700; color: #1e3a8a; margin: 0;">Maternal Mental Health Circles</h3>
             </div>
-            <p style="color: #4b5563; font-size: 16px; line-height: 1.8; margin-bottom: 15px;">Empowering adolescent mothers and survivors of gender-based violence through specialized support groups and mental health services.</p>
-            <p style="color: #6b7280; font-size: 15px; line-height: 1.7;">Our maternal circles provide a safe sisterhood where young mothers receive counselling, parenting support, and referrals to essential services.</p>
+            <p style="color: #4b5563; font-size: 16px; line-height: 1.8; margin-bottom: 15px;">Empowering adolescent mothers and survivors of gender-based violence through specialized support groups.</p>
+            <p style="color: #6b7280; font-size: 15px; line-height: 1.7;">Our maternal circles provide a safe sisterhood for counselling, parenting support, and referrals.</p>
           </div>
         </div>
         
-        <!-- Skills for Wellness -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center; margin-bottom: 80px;">
-          <div>
-            <img :src="skillsImg" alt="Skills for Wellness" style="width: 100%; border-radius: 20px; box-shadow: 0 20px 30px -10px rgba(0,0,0,0.1);" />
-          </div>
+          <div><img :src="skillsImg" alt="Skills for Wellness" style="width: 100%; border-radius: 20px; box-shadow: 0 20px 30px -10px rgba(0,0,0,0.1);" /></div>
           <div>
             <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
               <div style="width: 50px; height: 50px; background: #e0e7ff; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
@@ -363,108 +641,101 @@ onUnmounted(() => {
                   <polyline points="14 2 14 8 20 8" />
                   <line x1="16" y1="13" x2="8" y2="13" />
                   <line x1="16" y1="17" x2="8" y2="17" />
-                  <polyline points="10 9 9 9 8 9" />
                 </svg>
               </div>
               <h3 style="font-size: 28px; font-weight: 700; color: #1e3a8a; margin: 0;">Skills for Wellness</h3>
             </div>
-            <p style="color: #4b5563; font-size: 16px; line-height: 1.8; margin-bottom: 15px;">Linking mental health recovery to livelihoods through vocational training, entrepreneurship support, and economic empowerment initiatives.</p>
-            <p style="color: #6b7280; font-size: 15px; line-height: 1.7;">We've trained over 500 youth and women in income-generating activities, providing start-up kits and ongoing mentorship for sustainable recovery.</p>
+            <p style="color: #4b5563; font-size: 16px; line-height: 1.8; margin-bottom: 15px;">Linking mental health recovery to livelihoods through vocational training and entrepreneurship.</p>
+            <p style="color: #6b7280; font-size: 15px; line-height: 1.7;">500+ youth and women trained in income-generating activities with start-up kits and mentorship.</p>
           </div>
         </div>
         
-        <!-- Advocacy Hub -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center;">
-          <div style="order: 2;">
-            <img :src="advocacyImg" alt="Advocacy Hub" style="width: 100%; border-radius: 20px; box-shadow: 0 20px 30px -10px rgba(0,0,0,0.1);" />
-          </div>
+          <div style="order: 2;"><img :src="advocacyImg" alt="Advocacy Hub" style="width: 100%; border-radius: 20px; box-shadow: 0 20px 30px -10px rgba(0,0,0,0.1);" /></div>
           <div style="order: 1;">
             <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
               <div style="width: 50px; height: 50px; background: #e0e7ff; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.8">
-                  <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+                  <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4" />
                   <circle cx="12" cy="12" r="3" />
                 </svg>
               </div>
               <h3 style="font-size: 28px; font-weight: 700; color: #1e3a8a; margin: 0;">Advocacy & Policy Hub</h3>
             </div>
-            <p style="color: #4b5563; font-size: 16px; line-height: 1.8; margin-bottom: 15px;">Influencing policy, national mental health financing, and systemic change through evidence-based advocacy and stakeholder engagement.</p>
-            <p style="color: #6b7280; font-size: 15px; line-height: 1.7;">We've contributed to the Mental Health Act (2025), trained 150+ advocates, and continue pushing for increased government investment in mental health services.</p>
+            <p style="color: #4b5563; font-size: 16px; line-height: 1.8; margin-bottom: 15px;">Influencing policy and national mental health financing through evidence-based advocacy.</p>
+            <p style="color: #6b7280; font-size: 15px; line-height: 1.7;">Contributed to the Mental Health Act (2025) and trained 150+ advocates nationwide.</p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Articles Section -->
-    <section id="articles" style="padding: 80px 20px; background: #f0f9ff;">
+    <!-- Publications Section -->
+    <section id="publications" style="padding: 80px 20px; background: #f0f9ff;">
       <div style="max-width: 1200px; margin: 0 auto;">
-        <div style="text-align: center; margin-bottom: 50px;">
-          <h2 style="font-size: clamp(32px, 6vw, 42px); font-weight: 700; margin-bottom: 15px; color: #1e3a8a;">Latest Articles</h2>
-          <p style="color: #666; font-size: 18px;">Insights, stories, and information about mental health in Malawi</p>
+        <h2 style="text-align: center; font-size: clamp(32px, 6vw, 42px); font-weight: 700; margin-bottom: 20px; color: #1e3a8a;">Publications</h2>
+        <p style="text-align: center; color: #666; margin-bottom: 50px; font-size: 18px;">Explore our latest articles, research reports, and publications</p>
+        
+        <div style="display: flex; justify-content: center; gap: 20px; margin-bottom: 40px;">
+          <button @click="activeTab = 'articles'" :style="{ background: activeTab === 'articles' ? '#2563eb' : 'white', color: activeTab === 'articles' ? 'white' : '#1e3a8a', border: activeTab === 'articles' ? 'none' : '2px solid #2563eb', padding: '10px 30px', borderRadius: '40px', fontSize: '16px', fontWeight: '600', cursor: 'pointer' }">Articles</button>
+          <button @click="activeTab = 'reports'" :style="{ background: activeTab === 'reports' ? '#2563eb' : 'white', color: activeTab === 'reports' ? 'white' : '#1e3a8a', border: activeTab === 'reports' ? 'none' : '2px solid #2563eb', padding: '10px 30px', borderRadius: '40px', fontSize: '16px', fontWeight: '600', cursor: 'pointer' }">Reports</button>
         </div>
         
-        <div v-if="articlesLoading" style="text-align: center; padding: 60px;">Loading articles...</div>
-        <div v-else-if="articles.length === 0" style="text-align: center; padding: 60px;">No articles yet.</div>
-        <div v-else style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 30px;">
-          <div v-for="article in articles" :key="article.id" @click="router.push(`/articles/${article.id}`)" style="border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.08); cursor: pointer; transition: transform 0.3s; background: white;">
-            <div v-if="article.image_url" :style="{ height: '220px', backgroundImage: `url(${article.image_url})`, backgroundSize: 'cover', backgroundPosition: 'center' }"></div>
-            <div v-else style="height: 220px; background: linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%); display: flex; align-items: center; justify-content: center;">
-              <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5">
-                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-              </svg>
-            </div>
-            <div style="padding: 24px;">
-              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
-                <span style="background: #e0e7ff; color: #1e3a8a; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">Article</span>
-                <span style="color: #999; font-size: 12px;">{{ new Date(article.created_at).toLocaleDateString() }}</span>
+        <div v-if="activeTab === 'articles'">
+          <div v-if="articlesLoading" style="text-align: center; padding: 60px;">Loading articles...</div>
+          <div v-else-if="articles.length === 0" style="text-align: center; padding: 60px;">No articles yet.</div>
+          <div v-else style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px;">
+            <div v-for="article in articles" :key="article.id" @click="router.push(`/articles/${article.id}`)" style="background: white; border-radius: 20px; overflow: hidden; cursor: pointer; box-shadow: 0 10px 30px rgba(0,0,0,0.08);">
+              <div v-if="article.image_url" :style="{ height: '200px', backgroundImage: `url(${article.image_url})`, backgroundSize: 'cover', backgroundPosition: 'center' }"></div>
+              <div v-else style="height: 200px; background: linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%); display: flex; align-items: center; justify-content: center;">
+                <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5">
+                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                </svg>
               </div>
-              <h3 style="font-size: 20px; margin-bottom: 12px; color: #1e3a8a; line-height: 1.4;">{{ article.title }}</h3>
-              <p style="color: #666; margin-bottom: 16px; line-height: 1.6;">{{ truncate(article.subtitle || article.content, 100) }}</p>
-              <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e5e7eb; padding-top: 16px;">
-                <span style="color: #999; font-size: 13px;">By {{ article.author }}</span>
-                <span style="color: #2563eb; font-weight: 600; display: flex; align-items: center; gap: 5px;">Read More →</span>
+              <div style="padding: 25px;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                  <span style="background: #e0e7ff; color: #1e3a8a; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">Article</span>
+                  <span style="color: #999; font-size: 12px;">{{ new Date(article.created_at).toLocaleDateString() }}</span>
+                </div>
+                <h3 style="font-size: 20px; margin-bottom: 12px; color: #1e3a8a;">{{ article.title }}</h3>
+                <p style="color: #666; margin-bottom: 20px; line-height: 1.6;">{{ truncate(article.subtitle || article.content, 100) }}</p>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 15px; border-top: 1px solid #e5e7eb;">
+                  <span style="color: #999; font-size: 13px;">By {{ article.author }}</span>
+                  <span style="color: #2563eb; font-weight: 600;">Read More →</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        <div style="text-align: center; margin-top: 50px;">
-          <button @click="router.push('/articles')" style="background: #2563eb; color: white; border: none; padding: 12px 32px; border-radius: 40px; font-size: 16px; font-weight: 600; cursor: pointer;">View All Articles</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- Reports Section -->
-    <section id="reports" style="padding: 80px 20px; background: white;">
-      <div style="max-width: 1200px; margin: 0 auto;">
-        <div style="text-align: center; margin-bottom: 50px;">
-          <h2 style="font-size: clamp(32px, 6vw, 42px); font-weight: 700; margin-bottom: 15px; color: #1e3a8a;">Download Reports</h2>
-          <p style="color: #666; font-size: 18px;">Access our latest research, annual reports, and publications</p>
-        </div>
-        
-        <div v-if="reportsLoading" style="text-align: center; padding: 60px;">Loading reports...</div>
-        <div v-else-if="reports.length === 0" style="text-align: center; padding: 60px;">No reports available.</div>
-        <div v-else style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px;">
-          <div v-for="report in reports.slice(0, 3)" :key="report.id" style="background: #f0f9ff; border-radius: 16px; padding: 30px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.08); transition: transform 0.3s;">
-            <div style="width: 70px; height: 70px; background: #e0e7ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
-              <svg width="35" height="35" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.5">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                <polyline points="14 2 14 8 20 8" />
-                <line x1="16" y1="13" x2="8" y2="13" />
-                <line x1="16" y1="17" x2="8" y2="17" />
-              </svg>
-            </div>
-            <h3 style="font-size: 22px; margin-bottom: 12px; color: #1e3a8a;">{{ report.title }}</h3>
-            <p style="color: #666; margin-bottom: 20px; line-height: 1.6;">{{ report.description || 'Download our latest report on mental health initiatives in Malawi' }}</p>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding: 10px 0; border-top: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb;">
-              <span style="color: #999; font-size: 13px;">📅 {{ new Date(report.created_at).toLocaleDateString() }}</span>
-              <span style="color: #999; font-size: 13px;">📥 {{ report.download_count }} downloads</span>
-            </div>
-            <button @click="downloadReport(report.id, report.file_url)" style="width: 100%; background: #2563eb; color: white; border: none; padding: 12px; border-radius: 40px; font-size: 14px; font-weight: 600; cursor: pointer;">Download PDF</button>
+          <div style="text-align: center; margin-top: 50px;">
+            <button @click="router.push('/articles')" style="background: #2563eb; color: white; border: none; padding: 12px 32px; border-radius: 40px; font-size: 16px; font-weight: 600; cursor: pointer;">View All Articles</button>
           </div>
         </div>
-        <div style="text-align: center; margin-top: 50px;">
-          <button @click="router.push('/reports')" style="background: #2563eb; color: white; border: none; padding: 12px 32px; border-radius: 40px; font-size: 16px; font-weight: 600; cursor: pointer;">View All Reports</button>
+        
+        <div v-if="activeTab === 'reports'">
+          <div v-if="reportsLoading" style="text-align: center; padding: 60px;">Loading reports...</div>
+          <div v-else-if="reports.length === 0" style="text-align: center; padding: 60px;">No reports available.</div>
+          <div v-else style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px;">
+            <div v-for="report in reports.slice(0, 6)" :key="report.id" style="background: white; padding: 40px 30px; border-radius: 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.08);">
+              <div style="width: 70px; height: 70px; background: #e0e7ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+                <svg width="35" height="35" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.5">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                  <line x1="16" y1="13" x2="8" y2="13" />
+                  <line x1="16" y1="17" x2="8" y2="17" />
+                </svg>
+              </div>
+              <h3 style="font-size: 22px; margin-bottom: 15px; color: #1e3a8a;">{{ report.title }}</h3>
+              <p style="color: #666; margin-bottom: 20px; line-height: 1.6;">{{ report.description || 'Download our latest report on mental health initiatives in Malawi' }}</p>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding: 10px 0; border-top: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb;">
+                <span style="color: #999; font-size: 13px;">{{ new Date(report.created_at).toLocaleDateString() }}</span>
+                <span style="color: #999; font-size: 13px;">{{ report.download_count }} downloads</span>
+              </div>
+              <button @click="downloadReportFromAPI(report.id, report.file_url)" style="width: 100%; background: #2563eb; color: white; border: none; padding: 12px; border-radius: 40px; font-size: 14px; font-weight: 600; cursor: pointer;">Download PDF</button>
+            </div>
+          </div>
+          <div style="text-align: center; margin-top: 50px;">
+            <button @click="router.push('/reports')" style="background: #2563eb; color: white; border: none; padding: 12px 32px; border-radius: 40px; font-size: 16px; font-weight: 600; cursor: pointer;">View All Reports</button>
+          </div>
         </div>
       </div>
     </section>
@@ -473,23 +744,23 @@ onUnmounted(() => {
     <section id="getinvolved" style="padding: 80px 20px; background: #f0f9ff;">
       <div style="max-width: 1200px; margin: 0 auto;">
         <h2 style="text-align: center; font-size: clamp(32px, 6vw, 42px); font-weight: 700; margin-bottom: 20px; color: #1e3a8a;">Get Involved</h2>
-        <p style="text-align: center; color: #666; margin-bottom: 50px; font-size: 18px;">Join us in making mental health a priority in Malawi</p>
+        <p style="text-align: center; color: #4b5563; font-size: 18px; max-width: 800px; margin: 0 auto 50px auto; line-height: 1.6;">Mental health change takes all of us. Whether you want to volunteer, partner, support a campaign, or help create safer conversations in your community, there is space for you in this movement.</p>
         
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px;">
-          <div style="background: white; padding: 40px 30px; border-radius: 20px; text-align: center; transition: transform 0.3s;">
-            <div style="width: 60px; height: 60px; background: #e0e7ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 30px;">
+          <div style="background: white; border-radius: 20px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.08);">
+            <div style="width: 60px; height: 60px; background: #e0e7ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
               <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.8">
                 <path d="M12 2a10 10 0 1 0 10 10 10 10 0 0 0-10-10z" />
                 <path d="M12 6v6l4 2" />
               </svg>
             </div>
-            <h3 style="font-size: 22px; margin-bottom: 15px; color: #1e3a8a;">Become a Volunteer</h3>
-            <p style="color: #666; margin-bottom: 25px; line-height: 1.6;">Join our network of trained mental health advocates across Malawi.</p>
-            <button @click="handleVolunteer" style="background: #2563eb; color: white; border: none; padding: 10px 25px; border-radius: 30px; cursor: pointer;">Join Now</button>
+            <h3 style="font-size: 24px; font-weight: 700; color: #1e3a8a; margin-bottom: 15px;">Volunteer With Us</h3>
+            <p style="color: #4b5563; margin-bottom: 20px;">Join our growing network of mental health advocates across Malawi.</p>
+            <button @click="handleVolunteer" style="width: 100%; background: #2563eb; color: white; border: none; padding: 12px; border-radius: 40px; font-size: 16px; font-weight: 600; cursor: pointer;">Join Now →</button>
           </div>
           
-          <div style="background: white; padding: 40px 30px; border-radius: 20px; text-align: center; transition: transform 0.3s;">
-            <div style="width: 60px; height: 60px; background: #e0e7ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+          <div style="background: white; border-radius: 20px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.08);">
+            <div style="width: 60px; height: 60px; background: #e0e7ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
               <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.8">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                 <circle cx="9" cy="7" r="4" />
@@ -497,34 +768,34 @@ onUnmounted(() => {
                 <path d="M16 3.13a4 4 0 0 1 0 7.75" />
               </svg>
             </div>
-            <h3 style="font-size: 22px; margin-bottom: 15px; color: #1e3a8a;">Partner With Us</h3>
-            <p style="color: #666; margin-bottom: 25px; line-height: 1.6;">Collaborate with us to expand mental health services across sectors.</p>
-            <button @click="handlePartner" style="background: #2563eb; color: white; border: none; padding: 10px 25px; border-radius: 30px; cursor: pointer;">Partner Today</button>
+            <h3 style="font-size: 24px; font-weight: 700; color: #1e3a8a; margin-bottom: 15px;">Partner With Us</h3>
+            <p style="color: #4b5563; margin-bottom: 20px;">We collaborate with NGOs, schools, government, and private sector organisations.</p>
+            <button @click="handlePartner" style="width: 100%; background: #2563eb; color: white; border: none; padding: 12px; border-radius: 40px; font-size: 16px; font-weight: 600; cursor: pointer;">Partner Today →</button>
           </div>
           
-          <div style="background: white; padding: 40px 30px; border-radius: 20px; text-align: center; transition: transform 0.3s;">
-            <div style="width: 60px; height: 60px; background: #e0e7ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+          <div style="background: white; border-radius: 20px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.08);">
+            <div style="width: 60px; height: 60px; background: #e0e7ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
               <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.8">
                 <path d="M20 12V8h-4M12 4h4v4M4 12v4h4M12 20h-4v-4" />
                 <circle cx="12" cy="12" r="3" />
               </svg>
             </div>
-            <h3 style="font-size: 22px; margin-bottom: 15px; color: #1e3a8a;">Make a Donation</h3>
-            <p style="color: #666; margin-bottom: 25px; line-height: 1.6;">Support our programs and help us reach more communities.</p>
-            <button @click="handleDonate" style="background: #2563eb; color: white; border: none; padding: 10px 25px; border-radius: 30px; cursor: pointer;">Donate</button>
+            <h3 style="font-size: 24px; font-weight: 700; color: #1e3a8a; margin-bottom: 15px;">Support Our Work</h3>
+            <p style="color: #4b5563; margin-bottom: 20px;">Help us sustain free therapy, safe spaces, and awareness campaigns.</p>
+            <button @click="handleDonate" style="width: 100%; background: #2563eb; color: white; border: none; padding: 12px; border-radius: 40px; font-size: 16px; font-weight: 600; cursor: pointer;">Donate Now →</button>
           </div>
         </div>
       </div>
     </section>
 
     <!-- Contact Section -->
-    <section id="contact" style="padding: 80px 20px; background: white;">
+    <section id="contact" style="padding: 80px 20px; background: #f0f9ff;">
       <div style="max-width: 1200px; margin: 0 auto;">
         <h2 style="text-align: center; font-size: clamp(32px, 6vw, 42px); font-weight: 700; margin-bottom: 20px; color: #1e3a8a;">Contact Us</h2>
         <p style="text-align: center; color: #666; margin-bottom: 50px; font-size: 18px;">Have questions? Reach out to us.</p>
         
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 50px;">
-          <div style="background: #f0f9ff; padding: 40px; border-radius: 20px;">
+          <div style="background: white; padding: 40px; border-radius: 20px;">
             <h3 style="font-size: 24px; margin-bottom: 25px; color: #1e3a8a;">Get in Touch</h3>
             <div style="margin-bottom: 25px; display: flex; align-items: center; gap: 15px;">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2">
@@ -549,20 +820,14 @@ onUnmounted(() => {
             
             <h3 style="font-size: 20px; margin: 30px 0 20px; color: #1e3a8a;">Follow Us</h3>
             <div style="display: flex; gap: 15px;">
-              <a :href="SOCIAL_LINKS.facebook" target="_blank" style="width: 45px; height: 45px; background: #1877f2; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; transition: transform 0.3s;">
-                <svg width="20" height="20" fill="white" viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
-              </a>
-              <a :href="SOCIAL_LINKS.whatsapp" target="_blank" style="width: 45px; height: 45px; background: #25D366; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; transition: transform 0.3s;">
-                <svg width="20" height="20" fill="white" viewBox="0 0 24 24"><path d="M16.75 13.96c.25.13.41.2.46.3.06.11.04.6-.11 1.18-.13.53-1.02.98-1.66 1.02-.35.02-.74-.05-1.22-.19-.5-.15-1.03-.37-1.55-.67-1.13-.66-2.1-1.59-2.77-2.6-.58-.87-.91-1.78-.93-2.64-.01-.47.08-.93.27-1.34.19-.41.44-.74.73-1.02.3-.29.46-.41.6-.41.13 0 .26.01.37.11.1.1.27.33.34.45.06.12.12.25.18.38.05.13.1.27.14.4.04.13.07.26.09.39.02.13-.01.25-.07.36-.06.11-.13.21-.21.3-.08.09-.16.18-.23.27-.08.09-.14.16-.19.21-.05.06-.08.11-.05.18.03.07.09.16.16.27.3.49.74.92 1.26 1.22.2.11.35.19.44.24.07.04.12.07.15.1.03.03.05.06.06.09.01.03 0 .06-.03.09-.03.03-.09.09-.15.14-.06.05-.1.08-.14.11-.04.03-.08.06-.01.12.07.07.3.39.64.67.34.28.6.4.74.44.07.02.12.03.16.02.04 0 .09-.03.15-.08.06-.05.26-.28.34-.41.08-.13.16-.13.27-.08z"/><path d="M12 2C6.48 2 2 6.48 2 12c0 1.82.5 3.53 1.38 5L2.5 21.5l4.52-.95A9.91 9.91 0 0 0 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2z"/></svg>
-              </a>
-              <a :href="SOCIAL_LINKS.linkedin" target="_blank" style="width: 45px; height: 45px; background: #0077B5; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; transition: transform 0.3s;">
-                <svg width="20" height="20" fill="white" viewBox="0 0 24 24"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
-              </a>
+              <a :href="SOCIAL_LINKS.facebook" target="_blank" style="width: 45px; height: 45px; background: #1877f2; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none;">f</a>
+              <a :href="SOCIAL_LINKS.whatsapp" target="_blank" style="width: 45px; height: 45px; background: #25D366; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none;">w</a>
+              <a :href="SOCIAL_LINKS.linkedin" target="_blank" style="width: 45px; height: 45px; background: #0077B5; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none;">in</a>
             </div>
           </div>
           
           <form @submit.prevent="submitContact" style="display: flex; flex-direction: column; gap: 20px;">
-            <input v-model="contactForm.name" type="text" placeholder="Your Name" required style="padding: 15px; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 16px; transition: border 0.3s;" />
+            <input v-model="contactForm.name" type="text" placeholder="Your Name" required style="padding: 15px; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 16px;" />
             <input v-model="contactForm.email" type="email" placeholder="Your Email" required style="padding: 15px; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 16px;" />
             <textarea v-model="contactForm.message" placeholder="Your Message" rows="5" required style="padding: 15px; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 16px; resize: vertical;"></textarea>
             <button type="submit" :disabled="contactSubmitting" style="background: #2563eb; color: white; border: none; padding: 15px; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer;">{{ contactSubmitting ? 'Sending...' : 'Send Message' }}</button>
@@ -585,8 +850,7 @@ onUnmounted(() => {
             <div style="display: flex; flex-direction: column; gap: 10px;">
               <a @click="scrollTo('about')" style="color: white; opacity: 0.8; cursor: pointer;">About Us</a>
               <a @click="scrollTo('whatwedo')" style="color: white; opacity: 0.8; cursor: pointer;">What We Do</a>
-              <a @click="scrollTo('articles')" style="color: white; opacity: 0.8; cursor: pointer;">Articles</a>
-              <a @click="scrollTo('reports')" style="color: white; opacity: 0.8; cursor: pointer;">Reports</a>
+              <a @click="scrollTo('publications')" style="color: white; opacity: 0.8; cursor: pointer;">Publications</a>
               <a @click="scrollTo('getinvolved')" style="color: white; opacity: 0.8; cursor: pointer;">Get Involved</a>
               <a @click="scrollTo('contact')" style="color: white; opacity: 0.8; cursor: pointer;">Contact</a>
             </div>
@@ -700,19 +964,44 @@ button:active {
     order: 0 !important;
   }
   
+  #publications > div > div:last-child {
+    grid-template-columns: 1fr !important;
+  }
+  
+  #getinvolved > div > div:last-child {
+    grid-template-columns: 1fr !important;
+  }
+  
   #contact > div > div {
     grid-template-columns: 1fr !important;
   }
-}
-
-/* Tablet Styles */
-@media (min-width: 769px) and (max-width: 1024px) {
-  .desktop-menu {
-    gap: 20px !important;
+  
+  button[style*="position: absolute"] {
+    width: 35px !important;
+    height: 35px !important;
+    font-size: 18px !important;
   }
   
-  .desktop-menu a {
-    font-size: 13px !important;
+  [style*="height: 500px"] {
+    height: 300px !important;
+  }
+  
+  [style*="font-size: 32px"] {
+    font-size: 24px !important;
+  }
+  
+  [style*="font-size: 18px"][style*="color: rgba(255,255,255"] {
+    font-size: 14px !important;
+    max-width: 100% !important;
+  }
+  
+  [style*="padding: 50px 40px 40px"] {
+    padding: 30px 20px 20px !important;
+  }
+  
+  [style*="width: 70px"] {
+    width: 50px !important;
+    height: 50px !important;
   }
 }
 </style>

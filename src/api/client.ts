@@ -54,5 +54,19 @@ export const publicAPI = {
   saveVentingMessage: (data: { message: string; user_id?: string }) =>
     apiClient.post('/api/venting/messages', data),
 }
+// Add these to your src/api/client.ts file
+
+export interface ContactFormData {
+  name: string;
+  email: string;
+  message: string;
+}
+
+export interface WorkSlide {
+  id: number;
+  image: string;
+  title: string;
+  description: string;
+}
 
 export default apiClient

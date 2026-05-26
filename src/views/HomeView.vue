@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { publicAPI, type Article, type Report, type ContactFormData, type WorkSlide } from '@/api/client'
+import { publicAPI, type Article, type Report} from '@/api/client'
+import type { ContactFormData, WorkSlide } from '@/types'
 
 // Import logo and background images
 import logo from '@/assets/images/logo.png'

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { publicAPI, type Article, type Report } from '@/api/client'
+import { publicAPI, type Article, type Report, type ContactFormData, type WorkSlide } from '@/api/client'
 
 // Import logo and background images
 import logo from '@/assets/images/logo.png'
@@ -32,8 +32,8 @@ import digitalImg from '@/assets/images/digital.jpg'
 // Report PDF
 import freeTherapyPdf from '@/assets/reports/Free_therapy.pdf'
 
-// Slideshow data for Our Work Includes
-const workSlides = ref([
+// Slideshow data for Our Work Includes with proper typing
+const workSlides = ref<WorkSlide[]>([
   {
     id: 1,
     image: communityImg,
@@ -139,8 +139,8 @@ const SOCIAL_LINKS = {
 // Hero slides
 const heroSlides = [heroBg1, heroBg2, heroBg3, heroBg4, heroBg5]
 
-// Contact form
-const contactForm = ref({ name: '', email: '', message: '' })
+// Contact form with proper type
+const contactForm = ref<ContactFormData>({ name: '', email: '', message: '' })
 const contactSubmitting = ref(false)
 
 // Chat
@@ -376,8 +376,8 @@ onUnmounted(() => {
           
           <!-- Slideshow -->
           <div style="position: relative; max-width: 1200px; margin: 0 auto;">
-            <!-- Main Slide -->
-            <div style="background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.1);">
+            <!-- Main Slide with safe check -->
+            <div v-if="workSlides.length > 0 && workSlides[currentWorkSlide]" style="background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.1);">
               <div style="position: relative; height: 500px; overflow: hidden;">
                 <img :src="workSlides[currentWorkSlide].image" :alt="workSlides[currentWorkSlide].title" style="width: 100%; height: 100%; object-fit: cover;" />
                 <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.85), transparent); padding: 50px 40px 40px;">
@@ -385,6 +385,9 @@ onUnmounted(() => {
                   <p style="font-size: 18px; color: rgba(255,255,255,0.95); line-height: 1.6; max-width: 70%;">{{ workSlides[currentWorkSlide].description }}</p>
                 </div>
               </div>
+            </div>
+            <div v-else style="height: 500px; display: flex; align-items: center; justify-content: center; background: #f0f9ff; border-radius: 24px;">
+              <p>Loading slides...</p>
             </div>
             
             <!-- Navigation Arrows -->
@@ -554,7 +557,6 @@ onUnmounted(() => {
       </div>
     </div>
 
-    <!-- Rest of your sections (What We Do, Publications, Get Involved, Contact, Footer, Chat) -->
     <!-- What We Do Section -->
     <section id="whatwedo" style="padding: 80px 20px; background: white;">
       <div style="max-width: 1200px; margin: 0 auto;">

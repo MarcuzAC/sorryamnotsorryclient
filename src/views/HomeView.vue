@@ -1,8 +1,21 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { publicAPI, type Article, type Report} from '@/api/client'
-import type { ContactFormData, WorkSlide } from '@/types'
+import { publicAPI, type Article, type Report } from '@/api/client'
+
+// Define the missing types directly in this component
+interface ContactFormData {
+  name: string;
+  email: string;
+  message: string;
+}
+
+interface WorkSlide {
+  id: number;
+  image: string;
+  title: string;
+  description: string;
+}
 
 // Import logo and background images
 import logo from '@/assets/images/logo.png'
@@ -33,7 +46,7 @@ import digitalImg from '@/assets/images/digital.jpg'
 // Report PDF
 import freeTherapyPdf from '@/assets/reports/Free_therapy.pdf'
 
-// Slideshow data for Our Work Includes with proper typing
+// Slideshow data for Our Work Includes
 const workSlides = ref<WorkSlide[]>([
   {
     id: 1,
@@ -370,14 +383,14 @@ onUnmounted(() => {
           </p>
         </div>
 
-        <!-- Our Work Includes - BIG IMAGE SLIDESHOW -->
+        <!-- Our Work Includes - BIG IMAGE SLIDESHOW (FIXED WITH SAFETY CHECKS) -->
         <div style="margin-bottom: 50px;">
           <h3 style="text-align: center; font-size: 32px; font-weight: 700; color: #1e3a8a; margin-bottom: 15px;">Our Work Includes</h3>
           <p style="text-align: center; color: #4b5563; font-size: 18px; margin-bottom: 50px;">Explore the different ways we're making mental health support accessible across Malawi</p>
           
           <!-- Slideshow -->
           <div style="position: relative; max-width: 1200px; margin: 0 auto;">
-            <!-- Main Slide with safe check -->
+            <!-- Main Slide with SAFE CHECK - This fixes the TypeScript errors -->
             <div v-if="workSlides.length > 0 && workSlides[currentWorkSlide]" style="background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.1);">
               <div style="position: relative; height: 500px; overflow: hidden;">
                 <img :src="workSlides[currentWorkSlide].image" :alt="workSlides[currentWorkSlide].title" style="width: 100%; height: 100%; object-fit: cover;" />
@@ -387,6 +400,7 @@ onUnmounted(() => {
                 </div>
               </div>
             </div>
+            <!-- Fallback for when slides aren't ready -->
             <div v-else style="height: 500px; display: flex; align-items: center; justify-content: center; background: #f0f9ff; border-radius: 24px;">
               <p>Loading slides...</p>
             </div>

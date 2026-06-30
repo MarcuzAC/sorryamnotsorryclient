@@ -113,6 +113,23 @@ const goToWorkSlide = (index: number) => {
   currentWorkSlide.value = index
 }
 
+// Image Lightbox for Work Slides
+const showImageLightbox = ref(false)
+const lightboxImage = ref('')
+const lightboxTitle = ref('')
+
+const openImageLightbox = (image: string, title: string) => {
+  lightboxImage.value = image
+  lightboxTitle.value = title
+  showImageLightbox.value = true
+}
+
+const closeImageLightbox = () => {
+  showImageLightbox.value = false
+  lightboxImage.value = ''
+  lightboxTitle.value = ''
+}
+
 // Report preview modal
 const showReportModal = ref(false)
 const reportPdfUrl = freeTherapyPdf
@@ -132,6 +149,111 @@ const downloadReport = () => {
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
+}
+
+// Event modal
+const selectedEvent = ref<any>(null)
+const showEventModal = ref(false)
+const currentImageIndex = ref(0)
+
+// Event data with image arrays
+const events = ref([
+  {
+    id: 1,
+    title: "Paint and Vent",
+    description: "An expressive arts therapy session where participants painted their emotions, released stress, and connected with others in a safe, judgment-free creative space.",
+    date: "March 2024",
+    location: "Lilongwe, Malawi",
+    coverImage: "/src/assets/events/paint-cover.jpg",
+    images: [
+      "/src/assets/events/paint1.jpg",
+      "/src/assets/events/paint2.jpg",
+      "/src/assets/events/paint3.jpg",
+      "/src/assets/events/paint4.jpg",
+      "/src/assets/events/paint5.jpg"
+    ]
+  },
+  {
+    id: 2,
+    title: "Men's Solidarity Walk",
+    description: "A powerful awareness walk that encouraged men to speak openly about mental health challenges, break stigmas, and support one another through solidarity and action.",
+    date: "June 2024",
+    location: "Lilongwe, Malawi",
+    coverImage: "/src/assets/events/walk-cover.jpg",
+    images: [
+      "/src/assets/events/walk1.jpg",
+      "/src/assets/events/walk2.jpg",
+      "/src/assets/events/walk3.jpg",
+      "/src/assets/events/walk4.jpg",
+      "/src/assets/events/walk5.jpg"
+    ]
+  }
+])
+
+const openEvent = (event: any) => {
+  selectedEvent.value = event
+  currentImageIndex.value = 0
+  showEventModal.value = true
+}
+
+const closeEventModal = () => {
+  showEventModal.value = false
+  selectedEvent.value = null
+}
+
+const nextImage = () => {
+  if (selectedEvent.value && currentImageIndex.value < selectedEvent.value.images.length - 1) {
+    currentImageIndex.value++
+  }
+}
+
+const prevImage = () => {
+  if (selectedEvent.value && currentImageIndex.value > 0) {
+    currentImageIndex.value--
+  }
+}
+
+// Mouse enter/leave handlers
+const handleCardMouseEnter = (event: MouseEvent) => {
+  const target = event.currentTarget as HTMLElement
+  if (target) {
+    target.style.transform = 'translateY(-5px)'
+  }
+}
+
+const handleCardMouseLeave = (event: MouseEvent) => {
+  const target = event.currentTarget as HTMLElement
+  if (target) {
+    target.style.transform = 'translateY(0)'
+  }
+}
+
+const handleImageMouseEnter = (event: MouseEvent) => {
+  const target = event.target as HTMLElement
+  if (target) {
+    target.style.transform = 'scale(1.05)'
+  }
+}
+
+const handleImageMouseLeave = (event: MouseEvent) => {
+  const target = event.target as HTMLElement
+  if (target) {
+    target.style.transform = 'scale(1)'
+  }
+}
+
+const handleArrowMouseEnter = (event: MouseEvent) => {
+  const target = event.target as HTMLElement | null
+  if (target) {
+    target.style.background = 'rgba(0,0,0,0.8)'
+  }
+}
+
+const handleArrowMouseLeave = (event: MouseEvent) => {
+  const target = event.target as HTMLElement | null
+  if (target) {
+    target.style.background = 'rgba(0,0,0,0.6)'
+  }
 }
 
 const router = useRouter()
@@ -156,12 +278,6 @@ const heroSlides = [heroBg1, heroBg2, heroBg3, heroBg4, heroBg5]
 // Contact form with proper type
 const contactForm = ref<ContactFormData>({ name: '', email: '', message: '' })
 const contactSubmitting = ref(false)
-
-// Chat
-const chatOpen = ref(false)
-const chatMessages = ref<{ type: string; text: string }[]>([])
-const chatInput = ref('')
-const isTyping = ref(false)
 
 // Alert functions for buttons
 const handleVolunteer = () => {
@@ -214,54 +330,18 @@ const submitContact = async () => {
   }
 }
 
-const sendChatMessage = async () => {
-  if (!chatInput.value.trim()) return
-  
-  const userMessage = chatInput.value.trim()
-  chatMessages.value.push({ type: 'user', text: userMessage })
-  chatInput.value = ''
-  isTyping.value = true
-  
-  try {
-    await publicAPI.saveVentingMessage({ message: userMessage })
-  } catch (e) {
-    console.log('Failed to save message')
-  }
-  
-  setTimeout(() => {
-    let response = "Thank you for sharing. I hear you. Would you like to:\n\n1. Talk to a counselor\n2. Get mental health resources\n3. Speak to a human\n\nType the number of your choice."
-    
-    const lowerMsg = userMessage.toLowerCase()
-    if (lowerMsg.includes('1') || lowerMsg.includes('counselor')) {
-      response = "I'll connect you with a trained counselor. Please share your name and preferred time for a call."
-    } else if (lowerMsg.includes('2') || lowerMsg.includes('resource')) {
-      response = "Here are some resources:\n\n• Breathing exercises\n• Grounding techniques\n• Self-care tips\n\nYou can also call our helpline: +265 998 896 206"
-    } else if (lowerMsg.includes('3') || lowerMsg.includes('human')) {
-      response = "A human advocate will respond shortly. Please leave your phone number."
-    } else if (lowerMsg.includes('hello') || lowerMsg.includes('hi')) {
-      response = "Hello! Welcome to the Venting Room. How are you feeling today?"
-    }
-    
-    chatMessages.value.push({ type: 'bot', text: response })
-    isTyping.value = false
-  }, 1000)
-}
-
-const handleChatKeyPress = (e: KeyboardEvent) => {
-  if (e.key === 'Enter') sendChatMessage()
-}
-
 // Auto-slide
 let slideInterval: ReturnType<typeof setInterval>
 onMounted(async () => {
+  // Increased to 10 seconds for hero slides
   slideInterval = setInterval(() => {
     currentSlide.value = (currentSlide.value + 1) % heroSlides.length
-  }, 5000)
+  }, 10000)
   
-  // Auto-slide for work section
+  // Increased to 10 seconds for work slides
   workSlideInterval = setInterval(() => {
     nextWorkSlide()
-  }, 6000)
+  }, 10000)
   
   try {
     const res = await publicAPI.getArticles(0, 6)
@@ -280,8 +360,6 @@ onMounted(async () => {
   } finally {
     reportsLoading.value = false
   }
-  
-  chatMessages.value.push({ type: 'bot', text: "Welcome to the Venting Room. I'm here to listen and support you. How are you feeling today?" })
 })
 
 onUnmounted(() => {
@@ -309,6 +387,7 @@ onUnmounted(() => {
           <a @click="scrollTo('home')" style="cursor: pointer; color: #1e3a8a; font-weight: 500; font-size: 14px;">Home</a>
           <a @click="scrollTo('about')" style="cursor: pointer; color: #1e3a8a; font-weight: 500; font-size: 14px;">About</a>
           <a @click="scrollTo('whatwedo')" style="cursor: pointer; color: #1e3a8a; font-weight: 500; font-size: 14px;">What We Do</a>
+          <a @click="scrollTo('events')" style="cursor: pointer; color: #1e3a8a; font-weight: 500; font-size: 14px;">Events</a>
           <a @click="scrollTo('publications')" style="cursor: pointer; color: #1e3a8a; font-weight: 500; font-size: 14px;">Publications</a>
           <a @click="scrollTo('getinvolved')" style="cursor: pointer; color: #1e3a8a; font-weight: 500; font-size: 14px;">Get Involved</a>
           <a @click="scrollTo('contact')" style="cursor: pointer; color: #1e3a8a; font-weight: 500; font-size: 14px;">Contact</a>
@@ -332,6 +411,7 @@ onUnmounted(() => {
         <a @click="scrollTo('home')" style="cursor: pointer; color: #1e3a8a; font-weight: 500; padding: 8px 0;">Home</a>
         <a @click="scrollTo('about')" style="cursor: pointer; color: #1e3a8a; font-weight: 500; padding: 8px 0;">About</a>
         <a @click="scrollTo('whatwedo')" style="cursor: pointer; color: #1e3a8a; font-weight: 500; padding: 8px 0;">What We Do</a>
+        <a @click="scrollTo('events')" style="cursor: pointer; color: #1e3a8a; font-weight: 500; padding: 8px 0;">Events</a>
         <a @click="scrollTo('publications')" style="cursor: pointer; color: #1e3a8a; font-weight: 500; padding: 8px 0;">Publications</a>
         <a @click="scrollTo('getinvolved')" style="cursor: pointer; color: #1e3a8a; font-weight: 500; padding: 8px 0;">Get Involved</a>
         <a @click="scrollTo('contact')" style="cursor: pointer; color: #1e3a8a; font-weight: 500; padding: 8px 0;">Contact</a>
@@ -341,7 +421,7 @@ onUnmounted(() => {
 
     <!-- Hero Section with Slider -->
     <section id="home" style="position: relative; height: 100vh; overflow: hidden; margin-top: 0;">
-      <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; transition: transform 0.8s ease-in-out; transform: translateX(-{{ currentSlide * 100 }}%);">
+      <div :style="{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', transition: 'transform 0.8s ease-in-out', transform: `translateX(-${currentSlide * 100}%)` }">
         <div v-for="(slide, index) in heroSlides" :key="index" :style="{ flex: '0 0 100%', height: '100%', backgroundImage: `url(${slide})`, backgroundSize: 'cover', backgroundPosition: 'center', position: 'relative' }">
           <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5);"></div>
         </div>
@@ -352,9 +432,8 @@ onUnmounted(() => {
           <h1 style="font-size: clamp(28px, 8vw, 48px); font-weight: 700; margin-bottom: 16px;">Mainstreaming Mental Health as a Development Priority in Malawi</h1>
           <p style="font-size: clamp(14px, 4vw, 20px); margin-bottom: 24px; opacity: 0.9;">Together, we can turn silence into solidarity and make mental health everyone's business.</p>
           <div style="display: flex; flex-wrap: wrap; gap: 12px; justify-content: center;">
-            <button @click="scrollTo('publications')" style="background: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 50px; font-size: clamp(12px, 4vw, 16px); font-weight: 600; cursor: pointer;">Read Publications</button>
-            <button @click="$router.push('/reports')" style="background: transparent; border: 2px solid white; color: white; padding: 10px 20px; border-radius: 50px; font-size: clamp(12px, 4vw, 16px); font-weight: 600; cursor: pointer;">Download Reports</button>
-            <button @click="chatOpen = true" style="background: #f59e0b; border: none; color: white; padding: 10px 20px; border-radius: 50px; font-size: clamp(12px, 4vw, 16px); font-weight: 600; cursor: pointer;">Get Help</button>
+            <button @click="scrollTo('contact')" style="background: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 50px; font-size: clamp(12px, 4vw, 16px); font-weight: 600; cursor: pointer;">Get Help</button>
+            <button @click="handleDonate" style="background: #f59e0b; border: none; color: white; padding: 10px 20px; border-radius: 50px; font-size: clamp(12px, 4vw, 16px); font-weight: 600; cursor: pointer;">Donate</button>
           </div>
         </div>
       </div>
@@ -383,33 +462,34 @@ onUnmounted(() => {
           </p>
         </div>
 
-        <!-- Our Work Includes - BIG IMAGE SLIDESHOW (FULLY FIXED) -->
+        <!-- Our Work Includes - BIG IMAGE SLIDESHOW -->
         <div style="margin-bottom: 50px;">
           <h3 style="text-align: center; font-size: 32px; font-weight: 700; color: #1e3a8a; margin-bottom: 15px;">Our Work Includes</h3>
           <p style="text-align: center; color: #4b5563; font-size: 18px; margin-bottom: 50px;">Explore the different ways we're making mental health support accessible across Malawi</p>
           
           <!-- Slideshow -->
           <div style="position: relative; max-width: 1200px; margin: 0 auto;">
-            <!-- Main Slide with SAFE CHECK using non-null assertion -->
+            <!-- Main Slide -->
             <div v-if="workSlides[currentWorkSlide]" style="background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.1);">
               <div style="position: relative; height: 500px; overflow: hidden;">
-                <img :src="workSlides[currentWorkSlide]!.image" :alt="workSlides[currentWorkSlide]!.title" style="width: 100%; height: 100%; object-fit: cover;" />
+                <img 
+                  :src="workSlides[currentWorkSlide]!.image" 
+                  :alt="workSlides[currentWorkSlide]!.title" 
+                  style="width: 100%; height: 100%; object-fit: cover; cursor: pointer;"
+                  @click="openImageLightbox(workSlides[currentWorkSlide]!.image, workSlides[currentWorkSlide]!.title)"
+                />
                 <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.85), transparent); padding: 50px 40px 40px;">
                   <h4 style="font-size: 32px; font-weight: 700; color: white; margin-bottom: 12px;">{{ workSlides[currentWorkSlide]!.title }}</h4>
                   <p style="font-size: 18px; color: rgba(255,255,255,0.95); line-height: 1.6; max-width: 70%;">{{ workSlides[currentWorkSlide]!.description }}</p>
                 </div>
               </div>
             </div>
-            <!-- Fallback for when slides aren't ready -->
-            <div v-else style="height: 500px; display: flex; align-items: center; justify-content: center; background: #f0f9ff; border-radius: 24px;">
-              <p>Loading slides...</p>
-            </div>
             
             <!-- Navigation Arrows -->
-            <button @click="prevWorkSlide" style="position: absolute; top: 50%; left: 20px; transform: translateY(-50%); width: 48px; height: 48px; background: white; border: none; border-radius: 50%; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; color: #1e3a8a; transition: all 0.3s;">
+            <button @click="prevWorkSlide" style="position: absolute; top: 50%; left: 20px; transform: translateY(-50%); width: 48px; height: 48px; background: white; border: none; border-radius: 50%; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; color: #1e3a8a;">
               ←
             </button>
-            <button @click="nextWorkSlide" style="position: absolute; top: 50%; right: 20px; transform: translateY(-50%); width: 48px; height: 48px; background: white; border: none; border-radius: 50%; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; color: #1e3a8a; transition: all 0.3s;">
+            <button @click="nextWorkSlide" style="position: absolute; top: 50%; right: 20px; transform: translateY(-50%); width: 48px; height: 48px; background: white; border: none; border-radius: 50%; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; color: #1e3a8a;">
               →
             </button>
             
@@ -447,7 +527,7 @@ onUnmounted(() => {
                   padding: '0',
                   background: 'transparent'
                 }">
-                <img :src="slide.image" :alt="slide.title" style="width: 100%; height: 100%; object-fit: cover;" />
+                <img :src="slide.image" :alt="slide.title" style="width: 100%; height: 100%; object-fit: cover; cursor: pointer;" @click="openImageLightbox(slide.image, slide.title)" />
               </button>
             </div>
           </div>
@@ -555,22 +635,57 @@ onUnmounted(() => {
       </div>
     </section>
 
-    <!-- Report Preview Modal -->
-    <div v-if="showReportModal" @click="closeReportPreview" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px;">
-      <div @click.stop style="background: white; border-radius: 20px; width: 90%; max-width: 1000px; height: 80vh; display: flex; flex-direction: column; overflow: hidden;">
-        <div style="padding: 20px; background: #1e3a8a; color: white; display: flex; justify-content: space-between; align-items: center;">
-          <h3 style="margin: 0; font-size: 20px;">Free Therapy Initiative Report</h3>
-          <button @click="closeReportPreview" style="background: none; border: none; color: white; font-size: 24px; cursor: pointer;">&times;</button>
-        </div>
-        <div style="flex: 1; overflow: auto;">
-          <iframe :src="reportPdfUrl" style="width: 100%; height: 100%; border: none;"></iframe>
-        </div>
-        <div style="padding: 15px; background: #f0f9ff; display: flex; justify-content: center; gap: 15px;">
-          <button @click="downloadReport" style="background: #10b981; color: white; border: none; padding: 10px 24px; border-radius: 40px; cursor: pointer; font-weight: 600;">Download PDF</button>
-          <button @click="closeReportPreview" style="background: #6b7280; color: white; border: none; padding: 10px 24px; border-radius: 40px; cursor: pointer; font-weight: 600;">Close</button>
+    <!-- Events Section -->
+    <section id="events" style="padding: 80px 20px; background: #f0f9ff;">
+      <div style="max-width: 1200px; margin: 0 auto;">
+        <h2 style="text-align: center; font-size: clamp(32px, 6vw, 42px); font-weight: 700; margin-bottom: 20px; color: #1e3a8a;">Our Events</h2>
+        <p style="text-align: center; color: #666; margin-bottom: 50px; font-size: 18px;">Moments from our community gatherings and mental health awareness initiatives</p>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 30px;">
+          <div 
+            v-for="event in events" 
+            :key="event.id"
+            @click="openEvent(event)"
+            @mouseenter="handleCardMouseEnter"
+            @mouseleave="handleCardMouseLeave"
+            style="background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1); transition: transform 0.3s, box-shadow 0.3s; cursor: pointer;"
+          >
+            <div style="position: relative; height: 280px; overflow: hidden;">
+              <img 
+                :src="event.coverImage" 
+                :alt="event.title" 
+                @mouseenter="handleImageMouseEnter"
+                @mouseleave="handleImageMouseLeave"
+                style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s;"
+              />
+              <div style="position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.7); color: white; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">
+                {{ event.images.length }} photos
+              </div>
+            </div>
+            <div style="padding: 25px;">
+              <h3 style="font-size: 24px; font-weight: 700; color: #1e3a8a; margin-bottom: 12px;">{{ event.title }}</h3>
+              <p style="color: #4b5563; line-height: 1.6; margin-bottom: 15px;">{{ event.description }}</p>
+              <div style="display: flex; gap: 15px; margin-top: 15px; padding-top: 15px; border-top: 1px solid #e5e7eb;">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                  </svg>
+                  <span style="color: #666; font-size: 13px;">{{ event.date }}</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                    <circle cx="12" cy="10" r="3" />
+                  </svg>
+                  <span style="color: #666; font-size: 13px;">{{ event.location }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </section>
 
     <!-- What We Do Section -->
     <section id="whatwedo" style="padding: 80px 20px; background: white;">
@@ -758,13 +873,13 @@ onUnmounted(() => {
     </section>
 
     <!-- Get Involved Section -->
-    <section id="getinvolved" style="padding: 80px 20px; background: #f0f9ff;">
+    <section id="getinvolved" style="padding: 80px 20px; background: white;">
       <div style="max-width: 1200px; margin: 0 auto;">
         <h2 style="text-align: center; font-size: clamp(32px, 6vw, 42px); font-weight: 700; margin-bottom: 20px; color: #1e3a8a;">Get Involved</h2>
         <p style="text-align: center; color: #4b5563; font-size: 18px; max-width: 800px; margin: 0 auto 50px auto; line-height: 1.6;">Mental health change takes all of us. Whether you want to volunteer, partner, support a campaign, or help create safer conversations in your community, there is space for you in this movement.</p>
         
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 30px;">
-          <div style="background: white; border-radius: 20px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.08);">
+          <div style="background: #f0f9ff; border-radius: 20px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.08);">
             <div style="width: 60px; height: 60px; background: #e0e7ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
               <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.8">
                 <path d="M12 2a10 10 0 1 0 10 10 10 10 0 0 0-10-10z" />
@@ -776,7 +891,7 @@ onUnmounted(() => {
             <button @click="handleVolunteer" style="width: 100%; background: #2563eb; color: white; border: none; padding: 12px; border-radius: 40px; font-size: 16px; font-weight: 600; cursor: pointer;">Join Now →</button>
           </div>
           
-          <div style="background: white; border-radius: 20px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.08);">
+          <div style="background: #f0f9ff; border-radius: 20px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.08);">
             <div style="width: 60px; height: 60px; background: #e0e7ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
               <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.8">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
@@ -790,7 +905,7 @@ onUnmounted(() => {
             <button @click="handlePartner" style="width: 100%; background: #2563eb; color: white; border: none; padding: 12px; border-radius: 40px; font-size: 16px; font-weight: 600; cursor: pointer;">Partner Today →</button>
           </div>
           
-          <div style="background: white; border-radius: 20px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.08);">
+          <div style="background: #f0f9ff; border-radius: 20px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.08);">
             <div style="width: 60px; height: 60px; background: #e0e7ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
               <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.8">
                 <path d="M20 12V8h-4M12 4h4v4M4 12v4h4M12 20h-4v-4" />
@@ -867,6 +982,7 @@ onUnmounted(() => {
             <div style="display: flex; flex-direction: column; gap: 10px;">
               <a @click="scrollTo('about')" style="color: white; opacity: 0.8; cursor: pointer;">About Us</a>
               <a @click="scrollTo('whatwedo')" style="color: white; opacity: 0.8; cursor: pointer;">What We Do</a>
+              <a @click="scrollTo('events')" style="color: white; opacity: 0.8; cursor: pointer;">Events</a>
               <a @click="scrollTo('publications')" style="color: white; opacity: 0.8; cursor: pointer;">Publications</a>
               <a @click="scrollTo('getinvolved')" style="color: white; opacity: 0.8; cursor: pointer;">Get Involved</a>
               <a @click="scrollTo('contact')" style="color: white; opacity: 0.8; cursor: pointer;">Contact</a>
@@ -893,43 +1009,114 @@ onUnmounted(() => {
       </div>
     </footer>
 
-    <!-- Chat Widget -->
-    <div style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;">
-      <button @click="chatOpen = !chatOpen" style="width: 55px; height: 55px; border-radius: 50%; background: #2563eb; color: white; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; justify-content: center;">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-        </svg>
-      </button>
-      
-      <div v-if="chatOpen" style="position: fixed; bottom: 90px; right: 20px; width: calc(100vw - 40px); max-width: 350px; height: 500px; background: white; border-radius: 15px; box-shadow: 0 5px 25px rgba(0,0,0,0.2); display: flex; flex-direction: column; overflow: hidden;">
-        <div style="background: #1e3a8a; color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center;">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-            </svg>
-            <span><strong>Venting Room</strong><br /><small style="font-size: 9px;">We're here to listen</small></span>
+    <!-- Image Lightbox for Work Slides -->
+    <div v-if="showImageLightbox" @click="closeImageLightbox" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.95); z-index: 3000; display: flex; align-items: center; justify-content: center; padding: 20px; cursor: pointer;">
+      <div @click.stop style="max-width: 90vw; max-height: 90vh; position: relative;">
+        <img :src="lightboxImage" :alt="lightboxTitle" style="width: auto; height: auto; max-width: 90vw; max-height: 85vh; object-fit: contain; border-radius: 8px;" />
+        <div v-if="lightboxTitle" style="position: absolute; bottom: -50px; left: 0; right: 0; text-align: center; color: white; font-size: 20px; font-weight: 600; padding: 10px;">
+          {{ lightboxTitle }}
+        </div>
+        <button @click="closeImageLightbox" style="position: absolute; top: -50px; right: -50px; background: none; border: none; color: white; font-size: 36px; cursor: pointer; opacity: 0.7; transition: opacity 0.3s;" @mouseenter="(e) => (e.target as HTMLElement)?.style && ((e.target as HTMLElement).style.opacity = '1')" @mouseleave="(e) => (e.target as HTMLElement)?.style && ((e.target as HTMLElement).style.opacity = '0.7')">✕</button>
+      </div>
+    </div>
+
+    <!-- Report Preview Modal -->
+    <div v-if="showReportModal" @click="closeReportPreview" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px;">
+      <div @click.stop style="background: white; border-radius: 20px; width: 90%; max-width: 1000px; height: 80vh; display: flex; flex-direction: column; overflow: hidden;">
+        <div style="padding: 20px; background: #1e3a8a; color: white; display: flex; justify-content: space-between; align-items: center;">
+          <h3 style="margin: 0; font-size: 20px;">Free Therapy Initiative Report</h3>
+          <button @click="closeReportPreview" style="background: none; border: none; color: white; font-size: 24px; cursor: pointer;">&times;</button>
+        </div>
+        <div style="flex: 1; overflow: auto;">
+          <iframe :src="reportPdfUrl" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+        <div style="padding: 15px; background: #f0f9ff; display: flex; justify-content: center; gap: 15px;">
+          <button @click="downloadReport" style="background: #10b981; color: white; border: none; padding: 10px 24px; border-radius: 40px; cursor: pointer; font-weight: 600;">Download PDF</button>
+          <button @click="closeReportPreview" style="background: #6b7280; color: white; border: none; padding: 10px 24px; border-radius: 40px; cursor: pointer; font-weight: 600;">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Event Gallery Modal -->
+    <div v-if="showEventModal && selectedEvent" @click="closeEventModal" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px;">
+      <div @click.stop style="background: white; border-radius: 20px; width: 90%; max-width: 1200px; height: 85vh; display: flex; flex-direction: column; overflow: hidden;">
+        <!-- Modal Header -->
+        <div style="padding: 20px 25px; background: #1e3a8a; color: white; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <h3 style="margin: 0; font-size: 22px;">{{ selectedEvent.title }}</h3>
+            <p style="margin: 5px 0 0; opacity: 0.8; font-size: 13px;">{{ selectedEvent.date }} • {{ selectedEvent.location }}</p>
           </div>
-          <button @click="chatOpen = false" style="background: none; border: none; color: white; font-size: 20px; cursor: pointer;">✕</button>
+          <button @click="closeEventModal" style="background: none; border: none; color: white; font-size: 28px; cursor: pointer; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">&times;</button>
         </div>
         
-        <div style="flex: 1; padding: 15px; overflow-y: auto; background: #f0f9ff; display: flex; flex-direction: column; gap: 8px;">
-          <div v-for="(msg, idx) in chatMessages" :key="idx" :style="{ alignSelf: msg.type === 'user' ? 'flex-end' : 'flex-start' }">
-            <div :style="{ backgroundColor: msg.type === 'user' ? '#2563eb' : 'white', color: msg.type === 'user' ? 'white' : '#333', padding: '8px 12px', borderRadius: '10px', maxWidth: '220px', wordWrap: 'break-word', fontSize: '13px' }">
-              {{ msg.text }}
+        <!-- Image Gallery -->
+        <div style="flex: 1; overflow: auto; background: #f5f5f5;">
+          <div style="padding: 30px;">
+            <!-- Main Image Display -->
+            <div style="position: relative; margin-bottom: 30px;">
+              <img 
+                :src="selectedEvent.images[currentImageIndex]" 
+                :alt="selectedEvent.title"
+                style="width: 100%; height: auto; max-height: 500px; object-fit: contain; background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);"
+              />
+              
+              <!-- Navigation Arrows -->
+              <button 
+                v-if="currentImageIndex > 0"
+                @click="prevImage"
+                @mouseenter="handleArrowMouseEnter"
+                @mouseleave="handleArrowMouseLeave"
+                style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); width: 45px; height: 45px; background: rgba(0,0,0,0.6); color: white; border: none; border-radius: 50%; cursor: pointer; font-size: 24px; display: flex; align-items: center; justify-content: center; transition: all 0.3s;"
+              >
+                ←
+              </button>
+              <button 
+                v-if="currentImageIndex < selectedEvent.images.length - 1"
+                @click="nextImage"
+                @mouseenter="handleArrowMouseEnter"
+                @mouseleave="handleArrowMouseLeave"
+                style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); width: 45px; height: 45px; background: rgba(0,0,0,0.6); color: white; border: none; border-radius: 50%; cursor: pointer; font-size: 24px; display: flex; align-items: center; justify-content: center; transition: all 0.3s;"
+              >
+                →
+              </button>
+            </div>
+            
+            <!-- Thumbnail Strip -->
+            <div style="display: flex; gap: 12px; overflow-x: auto; padding: 10px 0;">
+              <div 
+                v-for="(image, idx) in selectedEvent.images" 
+                :key="idx"
+                @click="currentImageIndex = Number(idx)"
+                :style="{
+                  flexShrink: 0,
+                  width: '100px',
+                  height: '80px',
+                  borderRadius: '8px',
+                  overflow: 'hidden',
+                  cursor: 'pointer',
+                  border: currentImageIndex === idx ? '3px solid #2563eb' : '2px solid #e5e7eb',
+                  opacity: currentImageIndex === idx ? 1 : 0.7
+                }"
+              >
+                <img :src="image" :alt="`${selectedEvent.title} ${Number(idx) + 1}`" style="width: 100%; height: 100%; object-fit: cover;" />
+              </div>
+            </div>
+            
+            <!-- Event Description -->
+            <div style="margin-top: 30px; padding: 20px; background: #f0f9ff; border-radius: 12px;">
+              <h4 style="color: #1e3a8a; margin-bottom: 10px; font-size: 18px;">About this event</h4>
+              <p style="color: #4b5563; line-height: 1.7;">{{ selectedEvent.description }}</p>
             </div>
           </div>
-          <div v-if="isTyping" style="text-align: left;">
-            <div style="background: white; padding: 8px 12px; border-radius: 10px; display: inline-block; color: #666; font-size: 12px;">Advocate is typing...</div>
-          </div>
         </div>
         
-        <div style="padding: 12px; background: white; display: flex; gap: 8px; border-top: 1px solid #ddd;">
-          <input v-model="chatInput" @keypress="handleChatKeyPress" type="text" placeholder="Type your message..." style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 20px; font-size: 13px; font-family: 'Poppins', sans-serif;" />
-          <button @click="sendChatMessage" style="background: #2563eb; color: white; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="22" y1="2" x2="11" y2="13" />
-              <polygon points="22 2 15 22 11 13 2 9 22 2" />
-            </svg>
+        <!-- Modal Footer -->
+        <div style="padding: 15px 25px; background: white; border-top: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center;">
+          <div style="color: #666; font-size: 14px;">
+            Image {{ currentImageIndex + 1 }} of {{ selectedEvent.images.length }}
+          </div>
+          <button @click="closeEventModal" style="background: #2563eb; color: white; border: none; padding: 10px 24px; border-radius: 40px; font-size: 14px; font-weight: 600; cursor: pointer;">
+            Close Gallery
           </button>
         </div>
       </div>

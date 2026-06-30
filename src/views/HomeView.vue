@@ -279,6 +279,27 @@ const heroSlides = [heroBg1, heroBg2, heroBg3, heroBg4, heroBg5]
 const contactForm = ref<ContactFormData>({ name: '', email: '', message: '' })
 const contactSubmitting = ref(false)
 
+// --- Donation Modal Logic ---
+const showDonationModal = ref(false)
+
+const openDonationModal = () => {
+  showDonationModal.value = true
+}
+
+const closeDonationModal = () => {
+  showDonationModal.value = false
+}
+
+const copyAccountNumber = async () => {
+  const accountNumber = '1014209855'
+  try {
+    await navigator.clipboard.writeText(accountNumber)
+    alert('Account number copied to clipboard!')
+  } catch (err) {
+    alert('Could not copy account number. Please copy it manually: ' + accountNumber)
+  }
+}
+
 // Alert functions for buttons
 const handleVolunteer = () => {
   alert('Please email info@sorryimnotsorry.org to volunteer')
@@ -286,10 +307,6 @@ const handleVolunteer = () => {
 
 const handlePartner = () => {
   alert('Please email partnerships@sorryimnotsorry.org')
-}
-
-const handleDonate = () => {
-  alert('Thank you for your support! Donation page coming soon.')
 }
 
 const truncate = (text: string, length: number) => {
@@ -433,7 +450,7 @@ onUnmounted(() => {
           <p style="font-size: clamp(14px, 4vw, 20px); margin-bottom: 24px; opacity: 0.9;">Together, we can turn silence into solidarity and make mental health everyone's business.</p>
           <div style="display: flex; flex-wrap: wrap; gap: 12px; justify-content: center;">
             <button @click="scrollTo('contact')" style="background: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 50px; font-size: clamp(12px, 4vw, 16px); font-weight: 600; cursor: pointer;">Get Help</button>
-            <button @click="handleDonate" style="background: #f59e0b; border: none; color: white; padding: 10px 20px; border-radius: 50px; font-size: clamp(12px, 4vw, 16px); font-weight: 600; cursor: pointer;">Donate</button>
+            <button @click="openDonationModal" style="background: #f59e0b; border: none; color: white; padding: 10px 20px; border-radius: 50px; font-size: clamp(12px, 4vw, 16px); font-weight: 600; cursor: pointer;">Donate</button>
           </div>
         </div>
       </div>
@@ -914,7 +931,7 @@ onUnmounted(() => {
             </div>
             <h3 style="font-size: 24px; font-weight: 700; color: #1e3a8a; margin-bottom: 15px;">Support Our Work</h3>
             <p style="color: #4b5563; margin-bottom: 20px;">Help us sustain free therapy, safe spaces, and awareness campaigns.</p>
-            <button @click="handleDonate" style="width: 100%; background: #2563eb; color: white; border: none; padding: 12px; border-radius: 40px; font-size: 16px; font-weight: 600; cursor: pointer;">Donate Now →</button>
+            <button @click="openDonationModal" style="width: 100%; background: #2563eb; color: white; border: none; padding: 12px; border-radius: 40px; font-size: 16px; font-weight: 600; cursor: pointer;">Donate Now →</button>
           </div>
         </div>
       </div>
@@ -1119,6 +1136,53 @@ onUnmounted(() => {
             Close Gallery
           </button>
         </div>
+      </div>
+    </div>
+
+    <!-- Donation Modal -->
+    <div v-if="showDonationModal" @click="closeDonationModal" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 3000; display: flex; align-items: center; justify-content: center; padding: 20px;">
+      <div @click.stop style="background: white; border-radius: 20px; width: 90%; max-width: 500px; padding: 30px; position: relative; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+        <button @click="closeDonationModal" style="position: absolute; top: 15px; right: 20px; background: none; border: none; font-size: 28px; cursor: pointer; color: #6b7280;">&times;</button>
+        
+        <div style="text-align: center; margin-bottom: 30px;">
+          <div style="width: 70px; height: 70px; background: #e0e7ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
+            <svg width="35" height="35" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.8">
+              <path d="M12 2v4M12 22v-4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+              <circle cx="12" cy="12" r="4" />
+            </svg>
+          </div>
+          <h3 style="font-size: 24px; font-weight: 700; color: #1e3a8a; margin-bottom: 8px;">Bank Transfer Details</h3>
+          <p style="color: #4b5563; font-size: 15px;">Thank you for supporting our mission. Please use the details below to make a direct bank transfer.</p>
+        </div>
+
+        <div style="background: #f8fafc; border-radius: 12px; padding: 20px; margin-bottom: 25px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #e5e7eb;">
+            <span style="color: #6b7280; font-weight: 500;">Account Name</span>
+            <span style="color: #1e3a8a; font-weight: 600;">Sorry I'm Not Sorry</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #e5e7eb;">
+            <span style="color: #6b7280; font-weight: 500;">Account Number</span>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="color: #1e3a8a; font-weight: 700; font-size: 18px; letter-spacing: 1px;">1014209855</span>
+              <button @click="copyAccountNumber" style="background: #e0e7ff; border: none; border-radius: 6px; padding: 5px 10px; cursor: pointer; font-size: 12px; color: #2563eb; font-weight: 600;">Copy</button>
+            </div>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0;">
+            <span style="color: #6b7280; font-weight: 500;">Bank / Branch</span>
+            <span style="color: #1e3a8a; font-weight: 600;">Henderson Street Service Center</span>
+          </div>
+        </div>
+
+        <div style="background: #fef3c7; border-radius: 8px; padding: 12px 15px; margin-bottom: 25px; display: flex; align-items: start; gap: 10px;">
+          <span style="font-size: 20px;">ℹ️</span>
+          <p style="margin: 0; color: #92400e; font-size: 14px; line-height: 1.5;">
+            After making your transfer, please email us at <strong style="color: #1e3a8a;">info@sorryimnotsorry.org</strong> so we can acknowledge your generous contribution.
+          </p>
+        </div>
+
+        <button @click="closeDonationModal" style="width: 100%; background: #2563eb; color: white; border: none; padding: 14px; border-radius: 40px; font-size: 16px; font-weight: 600; cursor: pointer;">
+          I Understand, Close
+        </button>
       </div>
     </div>
   </div>
